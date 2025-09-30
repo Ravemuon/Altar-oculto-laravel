@@ -7,8 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Contato extends Model
 {
-    use HasFactory; // permite usar factories do Laravel
+    // Permite usar factories do Laravel para criar registros de teste
+    use HasFactory;
 
-    // CAMPOS QUE PODEM SER PREENCHIDOS EM MASSA
-    protected $fillable = ['nome', 'email', 'mensagem'];
+    // Campos que podem ser preenchidos em massa
+    // Facilita criar ou atualizar registros usando arrays com esses campos
+    protected $fillable = [
+        'nome',
+        'email',
+        'mensagem'
+    ];
 }

@@ -24,6 +24,7 @@ class Produto extends Model
         'popular',
         'ativo',
         'observacoes'
+
     ];
 
     // RELAÇÃO COM CATEGORIA (cada produto pertence a uma categoria)
@@ -31,4 +32,9 @@ class Produto extends Model
     {
         return $this->belongsTo(Categoria::class);
     }
+
+    public function itens()
+        {
+            return $this->hasMany(Item::class);
+        }
 }

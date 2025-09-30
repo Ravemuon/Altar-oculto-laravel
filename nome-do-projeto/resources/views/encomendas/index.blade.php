@@ -7,12 +7,13 @@
 
     {{-- 🛒 CARRINHO --}}
     <div class="card shadow-lg border-0 rounded-4 mb-5">
-        <div class="card-header" style="background-color: #FFD700; color: #000; font-weight:bold; text-align:center; font-size:1.25rem;">
+        <div class="card-header text-center fw-bold" style="background-color: #FFD700; color: #000; font-size:1.25rem;">
             🛒 Seu Carrinho
         </div>
         <div class="card-body bg-light text-black">
-            @if(session('carrinho') && count(session('carrinho')) > 0)
-                {{-- Tabela com produtos do carrinho --}}
+            @php $carrinho = session('carrinho', []); @endphp
+            @if(count($carrinho) > 0)
+                <!-- Tabela do carrinho -->
                 <div class="table-responsive mb-4">
                     <table class="table table-striped table-hover align-middle rounded-3 overflow-hidden">
                         <thead style="background-color: #FFD700; color: #000;">
@@ -26,26 +27,24 @@
                         </thead>
                         <tbody>
                             @php $total = 0; @endphp
-                            @foreach(session('carrinho') as $id => $item)
+                            @foreach($carrinho as $id => $item)
                                 @php
                                     $subtotal = $item['preco'] * $item['quantidade'];
                                     $total += $subtotal;
                                 @endphp
-                                <tr style="color: #000;">
+                                <tr>
                                     <td>{{ $item['nome'] }}</td>
                                     <td>R$ {{ number_format($item['preco'], 2, ',', '.') }}</td>
                                     <td>{{ $item['quantidade'] }}</td>
                                     <td>R$ {{ number_format($subtotal, 2, ',', '.') }}</td>
                                     <td class="text-center">
-                                        {{-- Botão para remover item --}}
-                                        <form action="{{ route('carrinho.remover', $id) }}" method="POST" class="d-inline-block">
+                                        <form action="{{ route('carrinho.remover', $id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-danger btn-sm rounded-pill">🗑 Remover</button>
                                         </form>
                                     </td>
                                 </tr>
                             @endforeach
-                            {{-- Linha do total --}}
                             <tr style="background-color: #FFD700; color: #000; font-weight:bold;">
                                 <td colspan="3" class="text-end">TOTAL</td>
                                 <td colspan="2">R$ {{ number_format($total, 2, ',', '.') }}</td>
@@ -54,7 +53,7 @@
                     </table>
                 </div>
 
-                {{-- Botão para finalizar encomenda --}}
+                <!-- Botão para finalizar pedido -->
                 <div class="text-end">
                     <a href="{{ route('encomendas.create') }}" class="btn btn-success btn-lg rounded-pill shadow">
                         ✅ Finalizar Encomenda
@@ -72,22 +71,18 @@
         <div class="row g-4">
             @foreach($produtos->take(4) as $produto)
                 <div class="col-md-3">
-                    <div class="card card-umbanda h-100 shadow-lg border-0 rounded-4 overflow-hidden hover-shadow">
+                    <div class="card h-100 shadow-lg border-0 rounded-4 overflow-hidden hover-shadow">
                         @if($produto->imagem)
-                            <img src="{{ $produto->imagem }}" class="card-img-top" alt="{{ $produto->nome }}"
-                                 style="height: 180px; object-fit: cover;">
+                            <img src="{{ $produto->imagem }}" class="card-img-top" alt="{{ $produto->nome }}" style="height:180px; object-fit:cover;">
                         @endif
-                        <div class="card-body d-flex flex-column" style="color: #000;">
+                        <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold">{{ $produto->nome }}</h5>
                             <p class="fw-bold mb-1">R$ {{ number_format($produto->preco, 2, ',', '.') }}</p>
                             <p class="small">Estoque: {{ $produto->estoque }}</p>
-
-                            {{-- Botão para adicionar produto ao carrinho --}}
                             <div class="mt-auto">
                                 <form action="{{ route('carrinho.adicionar', $produto->id) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm w-100 rounded-pill"
-                                            style="background-color: #FFD700; color: #000; font-weight:bold;">
+                                    <button type="submit" class="btn btn-sm w-100 rounded-pill" style="background-color:#FFD700; color:#000; font-weight:bold;">
                                         ➕ Adicionar ao Carrinho
                                     </button>
                                 </form>
@@ -101,16 +96,27 @@
 
     {{-- 📜 HISTÓRICO DE ENCOMENDAS --}}
     <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-header" style="background-color: #FFD700; color: #000; font-weight:bold; font-size:1.25rem;">
+        <div class="card-header text-center fw-bold" style="background-color: #FFD700; color: #000; font-size:1.25rem;">
             📜 Suas Encomendas
         </div>
         <div class="card-body bg-light text-black">
+
+            {{-- Formulário de pesquisa --}}
+            <form action="{{ route('encomendas.index') }}" method="GET" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Pesquisar por nome ou email" value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary">🔍 Pesquisar</button>
+                </div>
+            </form>
+
+            <!-- Tabela de encomendas -->
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle rounded-3 overflow-hidden shadow">
                     <thead style="background-color: #FFD700; color: #000;">
                         <tr>
                             <th>🙍 Cliente</th>
                             <th>📧 Email</th>
+                            <th>🏠 Endereço</th>
                             <th>🛒 Itens</th>
                             <th>💰 Total</th>
                             <th class="text-center">⚙ Ações</th>
@@ -118,9 +124,10 @@
                     </thead>
                     <tbody>
                         @forelse($encomendas as $encomenda)
-                            <tr style="color: #000;">
+                            <tr>
                                 <td>{{ $encomenda->nome_cliente }}</td>
                                 <td>{{ $encomenda->email_cliente }}</td>
+                                <td>{{ $encomenda->endereco }}</td>
                                 <td>
                                     <ul class="list-unstyled mb-0 small">
                                         @foreach($encomenda->itens as $item)
@@ -130,25 +137,28 @@
                                 </td>
                                 <td>R$ {{ number_format($encomenda->total, 2, ',', '.') }}</td>
                                 <td class="text-center">
-                                    {{-- Botão para editar --}}
-                                    <a href="{{ route('encomendas.edit', $encomenda) }}"
-                                       class="btn btn-warning btn-sm rounded-pill">✏ Editar</a>
-                                    {{-- Botão para excluir --}}
+                                    <a href="{{ route('encomendas.edit', $encomenda) }}" class="btn btn-warning btn-sm rounded-pill">✏ Editar</a>
                                     <form action="{{ route('encomendas.destroy', $encomenda) }}" method="POST" class="d-inline-block">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-danger btn-sm rounded-pill"
-                                                onclick="return confirm('Tem certeza que deseja excluir?')">🗑 Excluir</button>
+                                        <button type="submit" class="btn btn-danger btn-sm rounded-pill" onclick="return confirm('Tem certeza que deseja excluir este pedido?')">🗑 Excluir</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center" style="color: #000;">⚠ Nenhuma encomenda realizada.</td>
+                                <td colspan="6" class="text-center">⚠ Nenhuma encomenda realizada.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+
+                {{-- Paginação --}}
+                @if(method_exists($encomendas, 'links'))
+                    <div class="mt-3">
+                        {{ $encomendas->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>

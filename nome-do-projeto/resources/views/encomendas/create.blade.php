@@ -8,10 +8,13 @@
     <!-- Título principal -->
     <h1 class="mb-4 text-center fw-bold" style="color: #000;">🛒 Finalizar Pedido</h1>
 
-    @php $carrinho = session('carrinho', []); @endphp <!-- Pega o carrinho da sessão -->
+    @php
+        // Recupera o carrinho da sessão, ou cria um array vazio se não existir
+        $carrinho = session('carrinho', []);
+    @endphp
 
     @if(count($carrinho) > 0)
-        <!-- Tabela com itens do carrinho -->
+        <!-- Tabela com os itens do carrinho -->
         <div class="table-responsive mb-4">
             <table class="table table-light table-hover align-middle shadow rounded-3 overflow-hidden">
                 <thead class="bg-secondary text-light">
@@ -26,6 +29,7 @@
                     @php $total = 0; @endphp
                     @foreach($carrinho as $id => $item)
                         @php
+                            // Calcula subtotal e acumula o total
                             $subtotal = $item['preco'] * $item['quantidade'];
                             $total += $subtotal;
                         @endphp
@@ -44,10 +48,10 @@
             </table>
         </div>
 
-        <!-- Formulário para informações do cliente -->
+        <!-- Formulário de finalização do pedido -->
         <form action="{{ route('encomendas.store') }}" method="POST">
             @csrf
-            <h2 class="fw-bold mb-3" style="color: #000;"> Informações do Cliente</h2>
+            <h2 class="fw-bold mb-3" style="color: #000;">Informações do Cliente</h2>
 
             <div class="mb-3">
                 <label style="color: #000;">Nome do Cliente</label>
@@ -65,14 +69,19 @@
             </div>
 
             <div class="mb-3">
+                <label style="color: #000;">Endereço</label>
+                <input type="text" name="endereco" class="form-control" value="{{ old('endereco') }}" required>
+            </div>
+
+            <div class="mb-3">
                 <label style="color: #000;">Observações</label>
                 <textarea name="observacoes" class="form-control">{{ old('observacoes') }}</textarea>
             </div>
 
-            <!-- Total do pedido -->
+            <!-- Total do pedido enviado como campo oculto -->
             <input type="hidden" name="total" value="{{ $total }}">
 
-            <!-- Enviar itens do carrinho para o backend -->
+            <!-- Enviar os itens do carrinho para o backend -->
             @foreach($carrinho as $id => $item)
                 <input type="hidden" name="produtos[{{ $id }}][produto_id]" value="{{ $id }}">
                 <input type="hidden" name="produtos[{{ $id }}][quantidade]" value="{{ $item['quantidade'] }}">
@@ -115,7 +124,7 @@
     @else
         <!-- Mensagem quando o carrinho está vazio -->
         <p class="text-center fw-bold" style="color: #000;">⚠ Seu carrinho está vazio.</p>
-        <a href="{{ route('produtos.index') }}" class="btn btn-primary w-100 btn-lg mt-3"> Voltar às Compras</a>
+        <a href="{{ route('produtos.index') }}" class="btn btn-primary w-100 btn-lg mt-3">Voltar às Compras</a>
     @endif
 
 </div>

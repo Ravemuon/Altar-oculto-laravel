@@ -6,10 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class EncomendaItem extends Model
 {
-    protected $table = 'encomenda_itens'; // define a tabela correta
-    protected $fillable = ['encomenda_id', 'produto_id', 'quantidade', 'preco_unitario', 'subtotal']; // campos preenchíveis
+    // Define explicitamente a tabela no banco de dados
+    protected $table = 'encomenda_itens';
 
-    // RELAÇÃO COM PRODUTO (cada item pertence a um produto)
+    // Campos que podem ser preenchidos em massa
+    // Permite criar ou atualizar registros usando arrays com esses campos
+    protected $fillable = [
+        'encomenda_id',
+        'produto_id',
+        'quantidade',
+        'preco_unitario',
+        'subtotal',
+        'endereco'
+    ];
+
+    // Define a relação com o produto
+    // Cada item de encomenda pertence a um produto
     public function produto()
     {
         return $this->belongsTo(Produto::class);

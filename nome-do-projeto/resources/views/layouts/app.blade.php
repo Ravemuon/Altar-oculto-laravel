@@ -8,46 +8,54 @@
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+
 <!-- Custom Styles -->
 <style>
     /* Corpo e fonte */
     body {
         background: linear-gradient(180deg, #f2f0f5, #e6e1eb);
         color: #3d2b5f;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Montserrat', sans-serif;
+        scroll-behavior: smooth;
     }
 
     /* Navbar */
     .navbar {
         background: #f7f5fb;
-        padding: 1rem 1rem;
+        padding: 1rem 2rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     .navbar-brand {
         color: #6b3fa0 !important;
-        font-weight: bold;
-        font-size: 1.6rem;
+        font-weight: 900;
+        font-size: 1.8rem;
+        letter-spacing: 1px;
     }
 
-    a.nav-link {
+    .nav-link {
         color: #4b2c91 !important;
-        transition: color 0.3s;
+        font-weight: 600;
+        transition: color 0.3s, transform 0.2s;
     }
 
-    a.nav-link:hover {
+    .nav-link:hover {
         color: #9c6cff !important;
+        transform: scale(1.05);
     }
 
-    /* Hero / Poster */
+    /* Hero / Banner */
     .hero {
         background: url('https://i.pinimg.com/736x/6b/f4/9a/6bf49a0c607fe27907e95abc4e100ff1.jpg') center/cover no-repeat;
-        padding: 120px 20px;
+        padding: 140px 20px;
         border-radius: 15px;
         text-align: center;
-        margin-bottom: 50px;
+        margin-bottom: 60px;
         position: relative;
-        box-shadow: 0 0 25px rgba(107,63,160,0.25);
+        box-shadow: 0 0 30px rgba(107,63,160,0.25);
+        overflow: hidden;
     }
 
     .hero::after {
@@ -62,17 +70,17 @@
     .hero h1, .hero p {
         position: relative;
         z-index: 1;
-        color: #4b2c91;
-        text-shadow: 1px 1px 4px #fff;
+        text-shadow: 1px 1px 6px rgba(255,255,255,0.7);
     }
 
     .hero h1 {
-        font-size: 3rem;
+        font-size: 3.2rem;
         font-weight: 900;
+        margin-bottom: 1rem;
     }
 
     .hero p {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         color: #3d2b5f;
     }
 
@@ -86,8 +94,8 @@
     }
 
     .card-umbanda:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 25px rgba(107,63,160,0.25);
+        transform: translateY(-8px);
+        box-shadow: 0 14px 28px rgba(107,63,160,0.25);
     }
 
     .card-umbanda img {
@@ -99,7 +107,8 @@
     .btn-umbanda {
         background: linear-gradient(90deg, #6b3fa0, #9c6cff);
         color: #fff;
-        font-weight: bold;
+        font-weight: 700;
+        border-radius: 8px;
         transition: background 0.3s, transform 0.2s;
     }
 
@@ -113,32 +122,66 @@
     footer {
         background: #f7f5fb;
         color: #6b3fa0;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        padding: 1rem 0;
+        box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem 0;
+    }
+
+    footer p {
+        margin: 0;
+        font-weight: 500;
     }
 
     /* Títulos */
     h1, h2, h3, h4, h5 {
         color: #6b3fa0;
+        font-weight: 700;
     }
 
     p, li, span {
         color: #3d2b5f;
+        line-height: 1.6;
     }
 
     /* Seções */
     .section-title {
-        margin-bottom: 30px;
+        margin-bottom: 40px;
         text-align: center;
     }
 
     .section-title h2 {
-        font-weight: 700;
-        font-size: 2rem;
+        font-weight: 800;
+        font-size: 2.2rem;
         color: #6b3fa0;
+        position: relative;
+        display: inline-block;
     }
 
+    .section-title h2::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 4px;
+        background: #9c6cff;
+        margin: 8px auto 0;
+        border-radius: 2px;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2.2rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+        }
+    }
 </style>
+
 @stack('styles')
 </head>
 <body>

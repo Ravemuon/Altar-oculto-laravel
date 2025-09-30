@@ -4,25 +4,35 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Encomenda;
-use App\Models\EncomendaItem;
 use App\Models\Produto;
 
 class EncomendaController extends Controller
 {
-    // LISTA ENCOMENDAS E SUGESTÕES DE PRODUTOS
-    public function index()
+    // LISTA ENCOMENDAS COM OPÇÃO DE BUSCA
+    public function index(Request $request)
     {
-        $encomendas = Encomenda::with('itens.produto')->get(); // pega todas encomendas com produtos
-        $produtos = Produto::take(4)->get(); // produtos sugeridos
+        $query = Encomenda::with('itens.produto');
 
-        return view('encomendas.index', compact('encomendas', 'produtos')); // envia pra view
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nome_cliente', 'like', "%{$search}%")
+                ->orWhere('email_cliente', 'like', "%{$search}%");
+            });
+        }
+
+        $encomendas = $query->get();
+        $produtos = Produto::take(4)->get();
+
+        return view('encomendas.index', compact('encomendas', 'produtos'));
     }
 
-    // FORMULÁRIO PARA FINALIZAR PEDIDO
+
+    // FORMULÁRIO PARA CRIAR ENCOMENDA
     public function create()
     {
-        $produtos = Produto::take(4)->get(); // produtos sugeridos
-        return view('encomendas.create', compact('produtos')); // mostra formulário
+        $produtos = Produto::all();
+        return view('encomendas.create', compact('produtos'));
     }
 
     // SALVAR NOVA ENCOMENDA
@@ -34,66 +44,19 @@ class EncomendaController extends Controller
             'produtos' => 'required|array|min:1',
             'produtos.*.produto_id' => 'required|exists:produtos,id',
             'produtos.*.quantidade' => 'required|integer|min:1',
-        ]); // valida dados
+        ]);
 
         $encomenda = Encomenda::create([
             'nome_cliente' => $request->nome_cliente,
             'email_cliente' => $request->email_cliente,
             'telefone_cliente' => $request->telefone_cliente,
+            'endereco' => $request->endereco,
             'observacoes' => $request->observacoes,
             'total' => 0,
-        ]); // cria encomenda inicial
+        ]);
 
         $total = 0;
 
-        foreach ($request->produtos as $item) {
-            $produto = Produto::findOrFail($item['produto_id']); // pega produto
-            $subtotal = $produto->preco * $item['quantidade']; // calcula subtotal
-
-            $encomenda->itens()->create([
-                'produto_id' => $produto->id,
-                'quantidade' => $item['quantidade'],
-                'preco_unitario' => $produto->preco,
-                'subtotal' => $subtotal,
-            ]); // cria item da encomenda
-
-            $total += $subtotal; // soma total
-        }
-
-        $encomenda->update(['total' => $total]); // atualiza total da encomenda
-
-        return redirect()->route('encomendas.index')->with('success', 'Encomenda cadastrada com sucesso!');
-    }
-
-    // FORMULÁRIO PARA EDITAR ENCOMENDA
-    public function edit(Encomenda $encomenda)
-    {
-        $encomenda->load('itens.produto'); // carrega itens com produtos
-        $produtos = Produto::all(); // pega todos produtos
-        return view('encomendas.edit', compact('encomenda', 'produtos')); // mostra formulário
-    }
-
-    // ATUALIZAR ENCOMENDA
-    public function update(Request $request, Encomenda $encomenda)
-    {
-        $request->validate([
-            'nome_cliente' => 'required|min:3',
-            'email_cliente' => 'required|email',
-            'produtos' => 'required|array|min:1',
-            'produtos.*.produto_id' => 'required|exists:produtos,id',
-            'produtos.*.quantidade' => 'required|integer|min:1',
-        ]); // valida dados
-
-        $encomenda->update([
-            'nome_cliente' => $request->nome_cliente,
-            'email_cliente' => $request->email_cliente,
-            'telefone_cliente' => $request->telefone_cliente,
-            'observacoes' => $request->observacoes,
-        ]); // atualiza dados da encomenda
-
-        $encomenda->itens()->delete(); // remove itens antigos
-
-        $total = 0;
         foreach ($request->produtos as $item) {
             $produto = Produto::findOrFail($item['produto_id']);
             $subtotal = $produto->preco * $item['quantidade'];
@@ -103,34 +66,54 @@ class EncomendaController extends Controller
                 'quantidade' => $item['quantidade'],
                 'preco_unitario' => $produto->preco,
                 'subtotal' => $subtotal,
-            ]); // recria itens
+            ]);
 
             $total += $subtotal;
         }
 
-        $encomenda->update(['total' => $total]); // atualiza total
+        $encomenda->update(['total' => $total]);
+            // ✅ Limpa o carrinho da sessão
+                session()->forget('carrinho');
 
-        return redirect()->route('encomendas.index')->with('success', 'Encomenda atualizada com sucesso!');
+
+        return redirect()->route('encomendas.index')->with('success', 'Encomenda cadastrada com sucesso!');
     }
 
-    // EXCLUIR ENCOMENDA
+    // FORMULÁRIO PARA EDITAR ENCOMENDA
+    public function edit(Encomenda $encomenda)
+    {
+        $encomenda->load('itens.produto'); // apenas para exibir os itens
+        return view('encomendas.edit', compact('encomenda'));
+    }
+
+    // ATUALIZAR INFORMAÇÕES DO CLIENTE (SEM ALTERAR ITENS)
+    public function update(Request $request, Encomenda $encomenda)
+    {
+        $request->validate([
+            'nome_cliente' => 'required|min:3',
+            'email_cliente' => 'required|email',
+            'telefone_cliente' => 'nullable',
+            'endereco' => 'required',
+            'observacoes' => 'nullable',
+        ]);
+
+        $encomenda->update([
+            'nome_cliente' => $request->nome_cliente,
+            'email_cliente' => $request->email_cliente,
+            'telefone_cliente' => $request->telefone_cliente,
+            'endereco' => $request->endereco,
+            'observacoes' => $request->observacoes,
+        ]);
+
+        return redirect()->route('encomendas.index')->with('success', 'Informações do pedido atualizadas com sucesso!');
+    }
+
+    // EXCLUIR ENCOMENDA COMPLETA
     public function destroy(Encomenda $encomenda)
     {
-        $encomenda->delete(); // remove do banco
-        return redirect()->route('encomendas.index')->with('success', 'Encomenda excluída!');
+        $encomenda->itens()->delete();
+        $encomenda->delete();
+
+        return redirect()->route('encomendas.index')->with('success', 'Encomenda excluída com sucesso!');
     }
-    // REMOVER ITEM
-        public function removerItem($encomendaId, $produtoId)
-    {
-        $item = EncomendaItem::where('encomenda_id', $encomendaId)
-                            ->where('produto_id', $produtoId)
-                            ->first();
-
-        if ($item) {
-            $item->delete();
-        }
-
-        return redirect()->back()->with('success', 'Item removido com sucesso!');
-    }
-
 }
