@@ -96,7 +96,7 @@
 
                         {{-- Imagem da linha --}}
                         @if($linha->imagem)
-                            <img src="{{ $linha->imagem }}" class="card-img-top" alt="{{ $linha->nome }}" style="height:250px; object-fit:cover;">
+                            <img src="{{ $linha->imagem }}" class="card-img-top" alt="{{ $linha->nome }}" style="height:350px; object-fit:cover;">
                         @else
                             <div class="bg-light d-flex align-items-center justify-content-center" style="height:250px;">
                                 <span class="text-muted">Sem imagem</span>
