@@ -1,0 +1,2 @@
+// IMPORTA CONFIGURAÇÕES E DEPENDÊNCIAS DO BOOTSTRAP
+import './bootstrap';
