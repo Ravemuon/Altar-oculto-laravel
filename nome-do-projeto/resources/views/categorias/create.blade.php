@@ -7,11 +7,6 @@
     <!-- Título da página -->
     <h1 class="mb-4 text-umbanda text-center">Nova Categoria</h1>
 
-    <!-- Botão voltar -->
-    <div class="text-center mb-4">
-        <a href="{{ route('categorias.index') }}" class="btn btn-secondary btn-sm">← Voltar</a>
-    </div>
-
     <!-- Erros de validação -->
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -55,6 +50,12 @@
                 <button type="submit" class="btn btn-umbanda btn-lg">Criar Categoria</button>
             </div>
         </form>
+                {{-- Botão voltar --}}
+        <div class="text-center mt-5">
+            <a href="{{ url()->previous() }}" class="btn btn-umbanda btn-lg">
+                ← Voltar
+            </a>
+        </div>
     </div>
 </div>
 @endsection
