@@ -10,8 +10,13 @@
     <!-- Botões de ação para o produto -->
     <div class="mb-4 d-flex justify-content-center gap-2 flex-wrap">
 
-        <!-- Botão para voltar à lista de produtos -->
-        <a href="{{ route('produtos.index') }}" class="btn btn-outline-umbanda">← Voltar</a>
+        {{-- Botão voltar --}}
+        <div class="text-center mt-5">
+            <a href="{{ url()->previous() }}" class="btn btn-umbanda btn-lg">
+                ← Voltar
+            </a>
+    </div>
+
     </div>
 
     <!-- Seção principal: imagem e detalhes do produto -->
