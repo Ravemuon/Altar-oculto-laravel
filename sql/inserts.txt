@@ -47,3 +47,12 @@ INSERT INTO `produtos` (`id`, `nome`, `descricao`, `preco`, `imagem`, `categoria
 	(17, 'Jade', 'Pedra da harmonia e equilíbrio.', 22.00, 'https://exemplo.com/jade.jpg', 11, '2025-09-22 14:50:10', '2025-09-22 14:50:10', 18, 'PED004', 0.12, '5x5x5 cm', 'harmonia,equilibrio', 1, 1, 'Ideal para meditação ou colares'),
 	(18, 'Turmalina Negra', 'Pedra de proteção energética.', 25.00, 'https://exemplo.com/turmalina_negra.jpg', 11, '2025-09-22 14:50:10', '2025-09-22 14:50:10', 12, 'PED005', 0.15, '6x6x6 cm', 'protecao,energia', 1, 1, 'Colocar em ambientes ou altar');
 
+
+INSERT INTO `pontos` (`id`, `nome`, `tipo`, `entidade`, `funcao`, `letra`, `simbolo`, `categoria_id`, `descricao`, `audio`, `created_at`, `updated_at`) VALUES
+(1, 'Ponto de Oxalá', 'cantado', 'Oxalá', 'abertura', 'Oxalá é a luz que ilumina\nNos caminhos da paz e da vida', NULL, 1, 'Ponto de abertura de Oxalá', NULL, NOW(), NOW()),
+(2, 'Ponto de Iemanjá', 'cantado', 'Iemanjá', 'abertura', 'Salve Iemanjá!\nRainha das águas!', NULL, 2, 'Ponto de saudação à Iemanjá', NULL, NOW(), NOW()),
+(3, 'Ponto de Ogum', 'cantado', 'Ogum', 'abertura', 'Ogum é guerreiro\nabre os caminhos', NULL, 3, 'Ponto de Ogum para proteção e força', NULL, NOW(), NOW()),
+(4, 'Ponto de Xangô', 'cantado', 'Xangô', 'abertura', 'Xangô, justiceiro\ntraz o equilíbrio', NULL, 4, 'Ponto de Xangô para justiça e coragem', NULL, NOW(), NOW()),
+(5, 'Ponto de Oxóssi', 'cantado', 'Oxóssi', 'abertura', 'Oxóssi caçador\nabre os caminhos da fartura', NULL, 5, 'Ponto de Oxóssi para prosperidade', NULL, NOW(), NOW()),
+(6, 'Ponto de Caboclo', 'cantado', 'Caboclo', 'abertura', 'Caboclo sábio\nguias da mata e da cura', NULL, 6, 'Ponto de Caboclo para proteção e sabedoria', NULL, NOW(), NOW()),
+(7, 'Ponto de Exu', 'cantado', 'Exu', 'abertura', 'Exu senhor dos caminhos\nabre as encruzilhadas', NULL, 8, 'Ponto de Exu para abertura de caminhos', NULL, NOW(), NOW());

@@ -31,10 +31,26 @@
         <p><strong>Nome:</strong> {{ Auth::user()->nome }}</p>
         <p><strong>E-mail:</strong> {{ Auth::user()->email }}</p>
         <p><strong>Data de Cadastro:</strong> {{ Auth::user()->created_at->format('d/m/Y') }}</p>
+        <p>
+            <strong>Tipo de Conta:</strong>
+            @if(Auth::user()->fornecedor)
+                Conta de Fornecedor
+            @else
+                Conta Padrão
+            @endif
+        </p>
 
-        <div class="mt-4 text-center">
+        <div class="mt-4 text-center d-flex flex-column gap-2">
             <a href="{{ route('usuarios.edit', Auth::user()->id) }}" class="btn btn-outline-umbanda">✏ Editar Perfil</a>
-            <form action="{{ route('usuarios.logout') }}" method="POST" class="d-inline">
+
+            {{-- Botão para conta de fornecedor, só aparece se o usuário for fornecedor --}}
+            @if(Auth::user()->fornecedor)
+                <a href="{{ route('fornecedores.show', Auth::user()->fornecedor->id) }}" class="btn btn-success">
+                    🏪 Minha Conta de Fornecedor
+                </a>
+            @endif
+
+            <form action="{{ route('usuarios.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-danger">🚪 Sair</button>
             </form>

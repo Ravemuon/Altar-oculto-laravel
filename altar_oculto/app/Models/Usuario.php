@@ -3,23 +3,28 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\Notifiable;
 
 class Usuario extends Authenticatable
 {
-    protected $fillable = ['nome', 'email', 'senha'];
-    protected $hidden = ['senha'];
-    protected $table = 'usuarios';
+    use Notifiable;
 
-    // Indica para Laravel que a coluna de senha é 'senha'
-    public function getAuthPassword()
-    {
-        return $this->senha;
-    }
+    protected $fillable = [
+        'nome',
+        'email',
+        'senha',
+        'fornecedor_id', // precisa estar aqui
+        'imagem',
+    ];
 
-    // Relação: um usuário tem muitas encomendas
-    public function encomendas(): HasMany
+    protected $hidden = [
+        'senha',
+        'remember_token',
+    ];
+
+    // Relacionamento com Fornecedor
+    public function fornecedor()
     {
-        return $this->hasMany(Encomenda::class, 'user_id');
+        return $this->belongsTo(Fornecedor::class);
     }
 }

@@ -37,4 +37,11 @@ class Produto extends Model
         {
             return $this->hasMany(Item::class);
         }
+
+    public function fornecedores()
+    {
+        return $this->belongsToMany(Fornecedor::class)
+                    ->withPivot('quantidade')
+                    ->withTimestamps();
+    }
 }

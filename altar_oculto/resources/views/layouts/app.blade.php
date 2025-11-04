@@ -227,7 +227,7 @@
                         </li>
                     @else
                         <li class="nav-item">
-                            <a class="nav-link fw-bold" href="{{ route('usuarios.login') }}">Entrar / Cadastrar</a>
+                            <a class="nav-link fw-bold" href="{{ route('usuarios.login') }}">Entrar</a>
                         </li>
                     @endauth
                 </ul>

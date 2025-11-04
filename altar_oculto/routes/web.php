@@ -9,7 +9,8 @@ use App\Http\Controllers\{
     CarrinhoController,
     RelatorioController,
     UsuarioController,
-    PontoController
+    PontoController,
+    FornecedorController // <-- adicionado
 };
 
 // -----------------------------
@@ -18,24 +19,21 @@ use App\Http\Controllers\{
 Route::get('/', [ProdutoController::class, 'home'])->name('home');
 
 // -----------------------------
-// USUÁRIOS (Cadastro, Login, Perfil)
+// USUÁRIOS (Cadastro, Login, Perfil, Fornecedor)
 // -----------------------------
-Route::prefix('usuarios')->group(function () {
+Route::get('/create', [UsuarioController::class, 'create'])->name('usuarios.create');
+Route::post('/', [UsuarioController::class, 'store'])->name('usuarios.store');
+Route::get('/fornecedor', [UsuarioController::class, 'fornecedorForm'])->name('usuarios.fornecedorForm');
+Route::post('/fornecedor', [UsuarioController::class, 'storeFornecedor'])->name('usuarios.storeFornecedor');
+Route::get('/login', [UsuarioController::class, 'login'])->name('usuarios.login');
+Route::post('/login', [UsuarioController::class, 'loginSubmit'])->name('usuarios.login.submit');
+Route::post('/logout', [UsuarioController::class, 'logout'])->name('usuarios.logout');
 
-    Route::get('/', [UsuarioController::class, 'index'])->name('usuarios.index');
-    Route::get('/create', [UsuarioController::class, 'create'])->name('usuarios.create');
-    Route::post('/', [UsuarioController::class, 'store'])->name('usuarios.store');
-
-    Route::get('/login', [UsuarioController::class, 'login'])->name('usuarios.login');
-    Route::post('/login', [UsuarioController::class, 'loginSubmit'])->name('usuarios.login.submit');
-    Route::post('/logout', [UsuarioController::class, 'logout'])->name('usuarios.logout');
-
-    Route::middleware('auth')->group(function () {
-        Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
-        Route::post('/upload-imagem', [UsuarioController::class, 'uploadImagem'])->name('usuarios.upload_imagem');
-        Route::get('/{id}/edit', [UsuarioController::class, 'edit'])->name('usuarios.edit');
-        Route::put('/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
-    });
+Route::middleware('auth')->group(function () {
+    Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
+    Route::post('/upload-imagem', [UsuarioController::class, 'uploadImagem'])->name('usuarios.upload_imagem');
+    Route::get('/{id}/edit', [UsuarioController::class, 'edit'])->name('usuarios.edit');
+    Route::put('/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
 });
 
 // -----------------------------
@@ -43,7 +41,6 @@ Route::prefix('usuarios')->group(function () {
 // -----------------------------
 Route::resource('categorias', CategoriaController::class);
 Route::resource('produtos', ProdutoController::class);
-
 
 // -----------------------------
 // PONTOS
@@ -56,8 +53,6 @@ Route::prefix('pontos')->name('pontos.')->group(function () {
     Route::get('/{ponto}/edit', [PontoController::class, 'edit'])->name('edit');
     Route::put('/{ponto}', [PontoController::class, 'update'])->name('update');
     Route::delete('/{ponto}', [PontoController::class, 'destroy'])->name('destroy');
-
-    // Pontos por categoria
     Route::get('/categoria/{categoria}', [PontoController::class, 'categoria'])->name('categoria');
 });
 
@@ -98,4 +93,19 @@ Route::prefix('carrinho')->group(function () {
     Route::post('/limpar', [CarrinhoController::class, 'limpar'])->name('carrinho.limpar');
     Route::post('/atualizar/{id}', [CarrinhoController::class, 'atualizarItem'])->name('carrinho.atualizarItem');
     Route::delete('/removerItem/{id}', [CarrinhoController::class, 'removerItem'])->name('carrinho.removerItem');
+});
+
+// -----------------------------
+// FORNECEDORES
+// -----------------------------
+Route::prefix('fornecedores')->group(function () {
+    Route::get('/', [FornecedorController::class, 'index'])->name('fornecedores.index');
+    Route::get('/create', [FornecedorController::class, 'create'])->name('fornecedores.create');
+    Route::post('/', [FornecedorController::class, 'store'])->name('fornecedores.store');
+    Route::get('/{fornecedor}', [FornecedorController::class, 'show'])->name('fornecedores.show');
+    Route::get('/{fornecedor}/edit', [FornecedorController::class, 'edit'])->name('fornecedores.edit');
+    Route::put('/{fornecedor}', [FornecedorController::class, 'update'])->name('fornecedores.update');
+    Route::delete('/{fornecedor}', [FornecedorController::class, 'destroy'])->name('fornecedores.destroy');
+    Route::get('/{fornecedor}/estoque', [FornecedorController::class, 'estoque'])->name('fornecedores.estoque');
+    Route::post('/{fornecedor}/adicionar-estoque', [FornecedorController::class, 'adicionarEstoque'])->name('fornecedores.adicionarEstoque');
 });

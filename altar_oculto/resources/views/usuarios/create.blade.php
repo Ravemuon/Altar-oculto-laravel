@@ -12,31 +12,32 @@
                 <div class="mb-3">
                     <label for="nome" class="form-label">Nome</label>
                     <input type="text" name="nome" class="form-control" required value="{{ old('nome') }}">
-                    @error('nome')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
+                    @error('nome')<small class="text-danger">{{ $message }}</small>@enderror
                 </div>
 
                 <div class="mb-3">
                     <label for="email" class="form-label">E-mail</label>
                     <input type="email" name="email" class="form-control" required value="{{ old('email') }}">
-                    @error('email')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
+                    @error('email')<small class="text-danger">{{ $message }}</small>@enderror
                 </div>
 
                 <div class="mb-3">
                     <label for="senha" class="form-label">Senha</label>
                     <input type="password" name="senha" class="form-control" required>
-                    @error('senha')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
+                    @error('senha')<small class="text-danger">{{ $message }}</small>@enderror
                 </div>
 
-                <div class="text-center">
+                <div class="text-center mb-3">
                     <button type="submit" class="btn btn-umbanda w-100">Cadastrar</button>
                 </div>
             </form>
+
+            <hr>
+            <div class="text-center">
+                <a href="{{ route('usuarios.fornecedorForm') }}" class="btn btn-outline-primary">
+                    ⚡ É Fornecedor? Cadastre sua empresa
+                </a>
+            </div>
         </div>
     </div>
 </div>
