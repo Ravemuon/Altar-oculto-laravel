@@ -1,28 +1,40 @@
 @extends('layouts.app')
 
-@section('title', 'Adicionar Estoque - ' . $fornecedor->nome)
+@section('title', 'Fornecedores')
 
 @section('content')
-<div class="container py-4">
-    <h2 class="mb-4">Adicionar Estoque para {{ $fornecedor->nome }}</h2>
+<div class="container my-5">
+    <h1>🏪 Fornecedores</h1>
 
-    <form action="{{ route('fornecedores.adicionar-estoque', $fornecedor->id) }}" method="POST">
-        @csrf
-        <div class="mb-3">
-            <label for="produto_id" class="form-label">Produto</label>
-            <select name="produto_id" id="produto_id" class="form-select">
-                @foreach(\App\Models\Produto::all() as $produto)
-                    <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->quantidade }} em estoque)</option>
-                @endforeach
-            </select>
-        </div>
+    <a href="{{ route('fornecedores.create') }}" class="btn btn-success mb-3">➕ Adicionar Fornecedor</a>
 
-        <div class="mb-3">
-            <label for="quantidade" class="form-label">Quantidade a adicionar</label>
-            <input type="number" name="quantidade" id="quantidade" class="form-control" min="1" required>
-        </div>
-
-        <button type="submit" class="btn btn-umbanda">Adicionar Estoque</button>
-    </form>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($fornecedores as $fornecedor)
+            <tr>
+                <td>{{ $fornecedor->nome }}</td>
+                <td>{{ $fornecedor->email }}</td>
+                <td>{{ $fornecedor->telefone ?? '-' }}</td>
+                <td>
+                    <a href="{{ route('fornecedores.edit', $fornecedor->id) }}" class="btn btn-warning btn-sm">✏ Editar</a>
+                    <form action="{{ route('fornecedores.destroy', $fornecedor->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm">🗑 Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
 @endsection
+    

@@ -10,9 +10,15 @@
         <div class="text-center mb-4">
             {{-- Exibir imagem do usuário --}}
             @if(Auth::user()->imagem)
-                <img src="{{ asset('storage/' . Auth::user()->imagem) }}" alt="Foto de {{ Auth::user()->nome }}" class="rounded-circle shadow mb-3" style="width:150px; height:150px; object-fit:cover;">
+                <img src="{{ asset('storage/' . Auth::user()->imagem) }}"
+                     alt="Foto de {{ Auth::user()->nome }}"
+                     class="rounded-circle shadow mb-3"
+                     style="width:150px; height:150px; object-fit:cover;">
             @else
-                <img src="{{ asset('images/default-user.png') }}" alt="Foto padrão" class="rounded-circle shadow mb-3" style="width:150px; height:150px; object-fit:cover;">
+                <img src="{{ asset('images/default-user.png') }}"
+                     alt="Foto padrão"
+                     class="rounded-circle shadow mb-3"
+                     style="width:150px; height:150px; object-fit:cover;">
             @endif
         </div>
 
@@ -40,13 +46,22 @@
             @endif
         </p>
 
+        {{-- Dados do fornecedor --}}
+        @if(Auth::user()->fornecedor)
+            <hr>
+            <h4 class="text-center">🏪 Dados do Fornecedor</h4>
+            <p><strong>Nome Fantasia:</strong> {{ Auth::user()->fornecedor->nome ?? 'Não informado' }}</p>
+            <p><strong>Telefone:</strong> {{ Auth::user()->fornecedor->telefone ?? 'Não informado' }}</p>
+            <p><strong>Endereço:</strong> {{ Auth::user()->fornecedor->endereco ?? 'Não informado' }}</p>
+        @endif
+
         <div class="mt-4 text-center d-flex flex-column gap-2">
             <a href="{{ route('usuarios.edit', Auth::user()->id) }}" class="btn btn-outline-umbanda">✏ Editar Perfil</a>
 
-            {{-- Botão para conta de fornecedor, só aparece se o usuário for fornecedor --}}
+            {{-- Botão para fornecedor, só aparece se o usuário for fornecedor --}}
             @if(Auth::user()->fornecedor)
-                <a href="{{ route('fornecedores.show', Auth::user()->fornecedor->id) }}" class="btn btn-success">
-                    🏪 Minha Conta de Fornecedor
+                <a href="{{ route('fornecedores.estoque') }}" class="btn btn-warning text-white">
+                    📦 Meu Estoque
                 </a>
             @endif
 

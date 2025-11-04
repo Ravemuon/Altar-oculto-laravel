@@ -1,68 +1,74 @@
 @extends('layouts.app')
 
-@section('title', 'Estoque do Fornecedor - ' . $fornecedor->nome)
+@section('title', 'Estoque do Fornecedor')
 
 @section('content')
 <div class="container py-4">
+    <h2>📦 Estoque do Fornecedor</h2>
 
-    <h2 class="mb-4 text-umbanda">Estoque do Fornecedor: {{ $fornecedor->nome }}</h2>
+    {{-- Lista dos produtos adicionados pelo fornecedor --}}
+    <h4 class="mt-4">Produtos no Meu Estoque</h4>
+    @if($produtos->isEmpty())
+        <p>Você ainda não adicionou produtos ao estoque.</p>
+    @else
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($produtos as $item)
+                    <tr>
+                        <td>{{ $item->produto->nome }}</td>
+                        <td>{{ $item->quantidade }}</td>
+                        <td>
+                            <a href="{{ route('fornecedores.editar-estoque', $item->id) }}" class="btn btn-sm btn-warning">✏ Editar</a>
+                            <form action="{{ route('fornecedores.remover-estoque', $item->id) }}" method="POST" style="display:inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-danger" onclick="return confirm('Remover produto do estoque?')">🗑 Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 
-    {{-- Formulário para adicionar produtos --}}
-    <div class="card mb-4 shadow-sm rounded-4 p-4">
-        <h5 class="mb-3">Adicionar Produtos ao Estoque</h5>
-        <form action="{{ route('fornecedores.adicionar-estoque', $fornecedor->id) }}" method="POST">
-            @csrf
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="produto_id" class="form-label">Produto</label>
-                    <select name="produto_id" id="produto_id" class="form-select" required>
-                        <option value="">Selecione o produto</option>
-                        @foreach($produtos as $produto)
-                            <option value="{{ $produto->id }}">{{ $produto->nome }} ({{ $produto->quantidade }} em estoque)</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="quantidade" class="form-label">Quantidade a adicionar</label>
-                    <input type="number" name="quantidade" id="quantidade" class="form-control" min="1" required>
-                </div>
-
-                <div class="col-12">
-                    <button type="submit" class="btn btn-umbanda px-4 py-2 mt-2">Adicionar Estoque</button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    {{-- Tabela de produtos fornecidos --}}
-    <div class="card shadow-sm rounded-4 p-4">
-        <h5 class="mb-3">Produtos já fornecidos</h5>
-        @if($estoque->isEmpty())
-            <p class="text-muted">Nenhum produto adicionado ainda.</p>
-        @else
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light text-umbanda">
-                        <tr>
-                            <th>Produto</th>
-                            <th>Quantidade fornecida</th>
-                            <th>Estoque atual</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($estoque as $item)
-                            <tr>
-                                <td>{{ $item->nome }}</td>
-                                <td>{{ $item->pivot->quantidade }}</td>
-                                <td>{{ $item->quantidade }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </div>
-
+    {{-- Lista de todos os produtos cadastrados no sistema --}}
+    <h4 class="mt-5">📊 Relatório de Todos os Produtos</h4>
+    @if($todosProdutos->isEmpty())
+        <p>Nenhum produto cadastrado no sistema.</p>
+    @else
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Disponível no Estoque?</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($todosProdutos as $produto)
+                    <tr>
+                        <td>{{ $produto->nome }}</td>
+                        <td>{{ $produto->categoria->nome ?? '-' }}</td>
+                        <td>R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
+                        <td>
+                            @if($produtos->contains(fn($p) => $p->produto_id == $produto->id))
+                                ✅ Sim
+                            @else
+                                ❌ Não
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 </div>
 @endsection

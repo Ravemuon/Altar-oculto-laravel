@@ -3,100 +3,103 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Fornecedor;
 use App\Models\Produto;
+use App\Models\Estoque;
+use Illuminate\Support\Facades\Auth;
 
 class FornecedorController extends Controller
 {
-    // Listar fornecedores
-    public function index()
+    // Mostrar estoque do fornecedor
+    public function estoque()
     {
-        $fornecedores = Fornecedor::all();
-        return view('fornecedores.index', compact('fornecedores'));
+        $fornecedor = Auth::user();
+
+        // Produtos que o fornecedor adicionou
+        $produtos = Estoque::where('user_id', $fornecedor->id)->with('produto')->get();
+
+        // Todos os produtos do sistema
+        $todosProdutos = Produto::with('categoria')->get();
+
+        return view('fornecedores.estoque', compact('fornecedor', 'produtos', 'todosProdutos'));
     }
 
-    // Formulário de criação
-    public function create()
+    // Formulário para adicionar produto ao estoque
+    public function adicionarEstoque()
     {
-        return view('fornecedores.create');
+        $fornecedor = Auth::user();
+        $produtos = Produto::all(); // lista de todos os produtos do sistema
+        return view('fornecedores.adicionar-estoque', compact('fornecedor', 'produtos'));
     }
 
-    // Salvar novo fornecedor
-    public function store(Request $request)
+    // Salvar produto no estoque
+    public function salvarEstoque(Request $request)
     {
-        $data = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'telefone' => 'nullable|string|max:20',
-            'endereco' => 'nullable|string|max:255',
-        ]);
+        $fornecedor = Auth::user();
 
-        Fornecedor::create($data);
-
-        return redirect()->route('fornecedores.index')->with('success', 'Fornecedor criado com sucesso!');
-    }
-
-    // Formulário de edição
-    public function edit(Fornecedor $fornecedor)
-    {
-        return view('fornecedores.edit', compact('fornecedor'));
-    }
-
-    // Atualizar fornecedor
-    public function update(Request $request, Fornecedor $fornecedor)
-    {
-        $data = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'telefone' => 'nullable|string|max:20',
-            'endereco' => 'nullable|string|max:255',
-        ]);
-
-        $fornecedor->update($data);
-
-        return redirect()->route('fornecedores.index')->with('success', 'Fornecedor atualizado com sucesso!');
-    }
-
-    // Excluir fornecedor
-    public function destroy(Fornecedor $fornecedor)
-    {
-        $fornecedor->delete();
-        return redirect()->route('fornecedores.index')->with('success', 'Fornecedor excluído com sucesso!');
-    }
-
-    // Adicionar produtos ao estoque do fornecedor
-    public function adicionarEstoque(Request $request, Fornecedor $fornecedor)
-    {
-        $data = $request->validate([
+        // Validar
+        $request->validate([
             'produto_id' => 'required|exists:produtos,id',
             'quantidade' => 'required|integer|min:1',
         ]);
 
-        // Atualiza o estoque do fornecedor (pivot table)
-        $fornecedor->produtos()->syncWithoutDetaching([
-            $data['produto_id'] => ['quantidade' => $data['quantidade']]
+        // Verificar se já existe no estoque
+        $estoque = Estoque::where('user_id', $fornecedor->id)
+                          ->where('produto_id', $request->produto_id)
+                          ->first();
+
+        if ($estoque) {
+            // Atualiza a quantidade
+            $estoque->quantidade += $request->quantidade;
+            $estoque->save();
+        } else {
+            // Cria novo registro no estoque
+            Estoque::create([
+                'user_id' => $fornecedor->id,
+                'produto_id' => $request->produto_id,
+                'quantidade' => $request->quantidade,
+            ]);
+        }
+
+        return redirect()->route('fornecedores.estoque')->with('success', 'Produto adicionado ao estoque!');
+    }
+
+    // Formulário para editar quantidade
+    public function editarEstoque(Estoque $estoque)
+    {
+        $fornecedor = Auth::user();
+
+        // Garante que o estoque pertence ao fornecedor
+        if ($estoque->user_id !== $fornecedor->id) {
+            abort(403);
+        }
+
+        return view('fornecedores.editar-estoque', compact('fornecedor', 'estoque'));
+    }
+
+    // Atualizar quantidade
+    public function atualizarEstoque(Request $request, Estoque $estoque)
+    {
+        $fornecedor = Auth::user();
+        if ($estoque->user_id !== $fornecedor->id) abort(403);
+
+        $request->validate([
+            'quantidade' => 'required|integer|min:0',
         ]);
 
-        // Atualiza a quantidade do produto no estoque geral
-        $produto = Produto::findOrFail($data['produto_id']);
-        $produto->quantidade += $data['quantidade'];
-        $produto->save();
+        $estoque->quantidade = $request->quantidade;
+        $estoque->save();
 
-        return redirect()->back()->with('success', 'Estoque atualizado com sucesso!');
+        return redirect()->route('fornecedores.estoque')->with('success', 'Estoque atualizado!');
     }
 
-    // Página do estoque do fornecedor
-    public function estoque(Fornecedor $fornecedor)
+    // Remover produto do estoque
+    public function removerEstoque(Estoque $estoque)
     {
-        $produtos = Produto::all(); // todos os produtos disponíveis
-        $estoque = $fornecedor->produtos()->get(); // produtos já fornecidos por ele
+        $fornecedor = Auth::user();
+        if ($estoque->user_id !== $fornecedor->id) abort(403);
 
-        return view('fornecedores.estoque', compact('fornecedor', 'produtos', 'estoque'));
-    }
-    // Mostrar detalhes de um fornecedor
-    public function show(Fornecedor $fornecedor)
-    {
-        return view('fornecedores.show', compact('fornecedor'));
-    }
+        $estoque->delete();
 
+        return redirect()->route('fornecedores.estoque')->with('success', 'Produto removido do estoque!');
+    }
 }

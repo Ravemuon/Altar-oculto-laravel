@@ -10,7 +10,7 @@ use App\Http\Controllers\{
     RelatorioController,
     UsuarioController,
     PontoController,
-    FornecedorController // <-- adicionado
+    FornecedorController
 };
 
 // -----------------------------
@@ -35,7 +35,37 @@ Route::middleware('auth')->group(function () {
     Route::get('/{id}/edit', [UsuarioController::class, 'edit'])->name('usuarios.edit');
     Route::put('/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
 });
+Route::prefix('fornecedores')->middleware('auth')->group(function () {
 
+    // Perfil do fornecedor (mesmo do usuário)
+    Route::get('/perfil', [UsuarioController::class, 'perfil'])
+        ->name('fornecedores.perfil');
+
+    // Listar fornecedores
+    Route::get('/', [FornecedorController::class, 'index'])->name('fornecedores.index');
+
+    // Criar fornecedor
+    Route::get('/create', [FornecedorController::class, 'create'])->name('fornecedores.create');
+    Route::post('/', [FornecedorController::class, 'store'])->name('fornecedores.store');
+
+    // Editar fornecedor
+    Route::get('/{fornecedor}/edit', [FornecedorController::class, 'edit'])->name('fornecedores.edit');
+    Route::put('/{fornecedor}', [FornecedorController::class, 'update'])->name('fornecedores.update');
+
+    // Excluir fornecedor
+    Route::delete('/{fornecedor}', [FornecedorController::class, 'destroy'])->name('fornecedores.destroy');
+
+    // Estoque do fornecedor
+    Route::get('/estoque', [FornecedorController::class, 'estoque'])->name('fornecedores.estoque'); // lista estoque
+    Route::get('/estoque/adicionar', [FornecedorController::class, 'adicionarEstoque'])->name('fornecedores.adicionar-estoque'); // formulário
+    Route::post('/estoque', [FornecedorController::class, 'salvarEstoque'])->name('fornecedores.salvar-estoque'); // salvar produto
+    Route::get('/estoque/{produto}/editar', [FornecedorController::class, 'editarEstoque'])->name('fornecedores.editar-estoque'); // editar quantidade
+    Route::put('/estoque/{produto}', [FornecedorController::class, 'atualizarEstoque'])->name('fornecedores.atualizar-estoque'); // atualizar quantidade
+    Route::delete('/estoque/{produto}', [FornecedorController::class, 'removerEstoque'])->name('fornecedores.remover-estoque'); // remover produto
+
+    // Produtos do sistema (para adicionar ao estoque)
+    Route::get('/produtos', [FornecedorController::class, 'produtosSistema'])->name('fornecedores.produtos');
+});
 // -----------------------------
 // CATEGORIAS / PRODUTOS
 // -----------------------------
@@ -93,19 +123,4 @@ Route::prefix('carrinho')->group(function () {
     Route::post('/limpar', [CarrinhoController::class, 'limpar'])->name('carrinho.limpar');
     Route::post('/atualizar/{id}', [CarrinhoController::class, 'atualizarItem'])->name('carrinho.atualizarItem');
     Route::delete('/removerItem/{id}', [CarrinhoController::class, 'removerItem'])->name('carrinho.removerItem');
-});
-
-// -----------------------------
-// FORNECEDORES
-// -----------------------------
-Route::prefix('fornecedores')->group(function () {
-    Route::get('/', [FornecedorController::class, 'index'])->name('fornecedores.index');
-    Route::get('/create', [FornecedorController::class, 'create'])->name('fornecedores.create');
-    Route::post('/', [FornecedorController::class, 'store'])->name('fornecedores.store');
-    Route::get('/{fornecedor}', [FornecedorController::class, 'show'])->name('fornecedores.show');
-    Route::get('/{fornecedor}/edit', [FornecedorController::class, 'edit'])->name('fornecedores.edit');
-    Route::put('/{fornecedor}', [FornecedorController::class, 'update'])->name('fornecedores.update');
-    Route::delete('/{fornecedor}', [FornecedorController::class, 'destroy'])->name('fornecedores.destroy');
-    Route::get('/{fornecedor}/estoque', [FornecedorController::class, 'estoque'])->name('fornecedores.estoque');
-    Route::post('/{fornecedor}/adicionar-estoque', [FornecedorController::class, 'adicionarEstoque'])->name('fornecedores.adicionarEstoque');
 });
