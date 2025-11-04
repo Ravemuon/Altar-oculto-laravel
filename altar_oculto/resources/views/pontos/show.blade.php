@@ -1,26 +1,35 @@
 @extends('layouts.app')
-
-@section('title', $ponto->titulo)
+@section('title', $ponto->nome)
 
 @section('content')
-<div class="container my-5 text-center">
-    <h2 class="fw-bold text-umbanda mb-4">{{ $ponto->titulo }}</h2>
-    <p class="text-muted fst-italic">{{ $ponto->autor ?? 'Autor desconhecido' }}</p>
+<div class="container py-4">
+    <h2 class="fw-bold text-umbanda mb-4">{{ $ponto->nome }}</h2>
 
-    <p class="lead text-dark bg-light p-4 rounded-4 shadow-sm mx-auto" style="max-width: 600px;">
-        {!! nl2br(e($ponto->letra)) !!}
-    </p>
+    <p><strong>Tipo:</strong> {{ ucfirst($ponto->tipo) }}</p>
+    <p><strong>Função:</strong> {{ $ponto->funcao ?? 'Sem função' }}</p>
+    <p><strong>Entidade:</strong> {{ $ponto->entidade ?? 'Desconhecida' }}</p>
+    <p><strong>Categoria:</strong> {{ $ponto->categoria->nome ?? 'Sem categoria' }}</p>
+    <p><strong>Descrição:</strong> {{ $ponto->descricao ?? 'Nenhuma descrição' }}</p>
 
-    @if($ponto->audio)
-        <div class="mt-4">
-            <audio controls>
-                <source src="{{ asset('storage/'.$ponto->audio) }}" type="audio/mpeg">
-                Seu navegador não suporta áudio.
-            </audio>
-        </div>
+    @if($ponto->letra)
+        <h5>Letra</h5>
+        <p>{{ $ponto->letra }}</p>
     @endif
 
-    <div class="mt-5">
+    @if($ponto->simbolo)
+        <h5>Símbolo</h5>
+        <p>{{ $ponto->simbolo }}</p>
+    @endif
+
+    @if($ponto->audio)
+        <h5>Áudio</h5>
+        <audio controls>
+            <source src="{{ asset('storage/' . $ponto->audio) }}" type="audio/mpeg">
+            Seu navegador não suporta áudio.
+        </audio>
+    @endif
+
+    <div class="mt-4">
         <a href="{{ route('pontos.index') }}" class="btn btn-umbanda">← Voltar</a>
     </div>
 </div>

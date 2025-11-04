@@ -71,22 +71,13 @@
                                             Produtos
                                         </a>
                                     </div>
-
-                                    {{-- Botões Editar e Excluir --}}
-                                    <div class="card-footer d-flex justify-content-center gap-2 flex-wrap bg-white border-0 pt-0">
-                                        <a href="{{ route('categorias.edit', $categoria->id) }}"
-                                           class="btn btn-success btn-sm px-3 py-1 shadow-sm text-white fw-semibold hover-shadow"
-                                           title="Editar" style="transition: transform 0.2s;">
-                                                Editar
+                                    {{-- Botão de Pontos --}}
+                                    <div class="card-footer d-flex justify-content-center bg-white border-0 pb-2">
+                                        <a href="{{ route('pontos.index') }}?categoria_id={{ $categoria->id }}"
+                                        class="btn btn-umbanda btn-sm px-4 py-1 shadow-sm text-white fw-semibold hover-shadow"
+                                        style="transition: transform 0.2s;">
+                                            🎵 Pontos
                                         </a>
-                                        <form action="{{ route('categorias.destroy', $categoria->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja realmente excluir {{ $categoria->nome }}?')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit"
-                                                    class="btn btn-danger btn-sm px-3 py-1 shadow-sm text-white fw-semibold hover-shadow"
-                                                    title="Excluir" style="transition: transform 0.2s;">
-                                                Excluir
-                                            </button>
-                                        </form>
                                     </div>
                                 </div>
                             </div>

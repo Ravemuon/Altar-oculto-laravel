@@ -2,65 +2,54 @@
 
 @section('title', 'Carrinho & Encomendas')
 
+@php
+    $carrinho = session('carrinho', []);
+@endphp
+
 @section('content')
 <div class="container py-4">
 
-    {{-- 🛒 CARRINHO --}}
+    {{-- 🛒 CARRINHO RESUMIDO --}}
     <div class="card shadow-lg border-0 rounded-4 mb-5">
         <div class="card-header text-center fw-bold" style="background-color: #FFD700; color: #000; font-size:1.25rem;">
             🛒 Seu Carrinho
         </div>
         <div class="card-body bg-light text-black">
-            @php $carrinho = session('carrinho', []); @endphp
             @if(count($carrinho) > 0)
-                <!-- Tabela do carrinho -->
-                <div class="table-responsive mb-4">
-                    <table class="table table-striped table-hover align-middle rounded-3 overflow-hidden">
+                <div class="table-responsive mb-3">
+                    <table class="table table-striped align-middle">
                         <thead style="background-color: #FFD700; color: #000;">
                             <tr>
-                                <th>📦 Produto</th>
-                                <th>💲 Unitário</th>
-                                <th>🔢 Qtd</th>
-                                <th>💰 Subtotal</th>
-                                <th class="text-center">⚙ Ações</th>
+                                <th>Produto</th>
+                                <th>Qtd</th>
+                                <th>Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
                             @php $total = 0; @endphp
                             @foreach($carrinho as $id => $item)
-                                @php
-                                    $subtotal = $item['preco'] * $item['quantidade'];
-                                    $total += $subtotal;
-                                @endphp
+                                @php $subtotal = $item['preco'] * $item['quantidade']; $total += $subtotal; @endphp
                                 <tr>
                                     <td>{{ $item['nome'] }}</td>
-                                    <td>R$ {{ number_format($item['preco'], 2, ',', '.') }}</td>
                                     <td>{{ $item['quantidade'] }}</td>
                                     <td>R$ {{ number_format($subtotal, 2, ',', '.') }}</td>
-                                    <td class="text-center">
-                                        <form action="{{ route('carrinho.remover', $id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn btn-danger btn-sm rounded-pill">🗑 Remover</button>
-                                        </form>
-                                    </td>
                                 </tr>
                             @endforeach
-                            <tr style="background-color: #FFD700; color: #000; font-weight:bold;">
-                                <td colspan="3" class="text-end">TOTAL</td>
-                                <td colspan="2">R$ {{ number_format($total, 2, ',', '.') }}</td>
+                            <tr class="fw-bold" style="background-color: #FFD700; color:#000;">
+                                <td colspan="2" class="text-end">Total</td>
+                                <td>R$ {{ number_format($total, 2, ',', '.') }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Botão para finalizar pedido -->
                 <div class="text-end">
                     <a href="{{ route('encomendas.create') }}" class="btn btn-success btn-lg rounded-pill shadow">
-                        ✅ Finalizar Encomenda
+                        🛠 Ver/Finalizar Carrinho
                     </a>
                 </div>
             @else
-                <p class="text-center my-4" style="color: #000;">⚠ Seu carrinho está vazio.</p>
+                <p class="text-center fw-bold">⚠ Seu carrinho está vazio.</p>
             @endif
         </div>
     </div>

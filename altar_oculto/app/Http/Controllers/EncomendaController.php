@@ -4,20 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Encomenda;
+use App\Models\EncomendaItem;
 use App\Models\Produto;
-use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
 class EncomendaController extends Controller
 {
-    public function encomendas()
-    {
-        $usuarios = User::with('encomendas.itens.produto')->get();
-        $pdf = Pdf::loadView('relatorios.encomendas', compact('usuarios'));
-        return $pdf->stream('relatorio_encomendas.pdf');
-    }
-    
-    // LISTA ENCOMENDAS COM OPÇÃO DE BUSCA
+    // LISTA ENCOMENDAS
     public function index(Request $request)
     {
         $query = Encomenda::with('itens.produto');
@@ -26,7 +19,7 @@ class EncomendaController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('nome_cliente', 'like', "%{$search}%")
-                ->orWhere('email_cliente', 'like', "%{$search}%");
+                  ->orWhere('email_cliente', 'like', "%{$search}%");
             });
         }
 
@@ -36,38 +29,49 @@ class EncomendaController extends Controller
         return view('encomendas.index', compact('encomendas', 'produtos'));
     }
 
-
-    // FORMULÁRIO PARA CRIAR ENCOMENDA
+    // FORMULÁRIO DE CRIAÇÃO (finalização do carrinho)
     public function create()
     {
         $produtos = Produto::all();
         return view('encomendas.create', compact('produtos'));
     }
 
-    // SALVAR NOVA ENCOMENDA
+    // SALVAR NOVA ENCOMENDA A PARTIR DO CARRINHO
     public function store(Request $request)
     {
+        $carrinho = session('carrinho', []);
+
+        if (empty($carrinho)) {
+            return redirect()->back()->with('error', 'O carrinho está vazio.');
+        }
+
+        // Validação básica do cliente
         $request->validate([
-            'nome_cliente' => 'required|min:3',
+            'nome_cliente' => 'required|string|min:3',
             'email_cliente' => 'required|email',
-            'produtos' => 'required|array|min:1',
-            'produtos.*.produto_id' => 'required|exists:produtos,id',
-            'produtos.*.quantidade' => 'required|integer|min:1',
+            'telefone_cliente' => 'nullable|string',
+            'endereco' => 'required|string',
+            'observacoes' => 'nullable|string',
         ]);
 
+        // Cria a encomenda
         $encomenda = Encomenda::create([
+            'user_id' => Auth::id(),
             'nome_cliente' => $request->nome_cliente,
             'email_cliente' => $request->email_cliente,
             'telefone_cliente' => $request->telefone_cliente,
             'endereco' => $request->endereco,
             'observacoes' => $request->observacoes,
-            'total' => 0,
+            'total' => 0, // será atualizado depois
         ]);
 
         $total = 0;
 
-        foreach ($request->produtos as $item) {
-            $produto = Produto::findOrFail($item['produto_id']);
+        // Adiciona itens do carrinho
+        foreach ($carrinho as $id => $item) {
+            $produto = Produto::find($id);
+            if (!$produto) continue;
+
             $subtotal = $produto->preco * $item['quantidade'];
 
             $encomenda->itens()->create([
@@ -80,10 +84,11 @@ class EncomendaController extends Controller
             $total += $subtotal;
         }
 
+        // Atualiza o total da encomenda
         $encomenda->update(['total' => $total]);
-            // ✅ Limpa o carrinho da sessão
-                session()->forget('carrinho');
 
+        // Limpa o carrinho da sessão
+        session()->forget('carrinho');
 
         return redirect()->route('encomendas.index')->with('success', 'Encomenda cadastrada com sucesso!');
     }
@@ -91,11 +96,11 @@ class EncomendaController extends Controller
     // FORMULÁRIO PARA EDITAR ENCOMENDA
     public function edit(Encomenda $encomenda)
     {
-        $encomenda->load('itens.produto'); // apenas para exibir os itens
+        $encomenda->load('itens.produto');
         return view('encomendas.edit', compact('encomenda'));
     }
 
-    // ATUALIZAR INFORMAÇÕES DO CLIENTE (SEM ALTERAR ITENS)
+    // ATUALIZA INFORMAÇÕES DO CLIENTE 
     public function update(Request $request, Encomenda $encomenda)
     {
         $request->validate([

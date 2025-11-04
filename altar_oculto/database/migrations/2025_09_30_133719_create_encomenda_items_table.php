@@ -11,14 +11,14 @@ return new class extends Migration {
         Schema::create('encomenda_itens', function (Blueprint $table) {
             $table->id();
 
-            // 🔗 Chaves estrangeiras
+            // Chaves estrangeiras
             $table->foreignId('encomenda_id')->constrained('encomendas')->onDelete('cascade');
             $table->foreignId('produto_id')->constrained('produtos')->onDelete('cascade');
 
             // Dados do item
             $table->integer('quantidade')->default(1);
-            $table->decimal('preco_unitario', 8, 2);
-            $table->decimal('subtotal', 8, 2);
+            $table->decimal('preco_unitario', 8, 2)->default(0); // valor padrão adicionado
+            $table->decimal('subtotal', 8, 2)->default(0);      // valor padrão adicionado
             $table->timestamps();
         });
     }

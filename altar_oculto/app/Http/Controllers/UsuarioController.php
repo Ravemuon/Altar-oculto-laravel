@@ -74,4 +74,22 @@ class UsuarioController extends Controller
         Auth::logout();
         return redirect('/')->with('success', 'Você saiu da sua conta.');
     }
+
+public function uploadImagem(Request $request)
+{
+    $request->validate([
+        'imagem' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    ]);
+
+    $user = Auth::user();
+
+    if ($request->hasFile('imagem')) {
+        $imagem = $request->file('imagem')->store('perfil', 'public');
+        $user->imagem = $imagem;
+        $user->save();
+    }
+
+    return back()->with('success', 'Imagem de perfil atualizada com sucesso!');
+}
+
 }

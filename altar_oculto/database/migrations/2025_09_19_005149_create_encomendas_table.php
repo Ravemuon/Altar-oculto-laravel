@@ -14,8 +14,8 @@ return new class extends Migration {
             // 🔗 Relacionamento com usuário
             $table->foreignId('user_id')->nullable()->constrained('usuarios')->onDelete('cascade');
 
-            // Dados do cliente (redundância útil, caso ele altere depois)
-            $table->string('nome_cliente');
+            // Dados do cliente
+            $table->string('nome_cliente')->default('Cliente Desconhecido');
             $table->string('email_cliente')->nullable();
             $table->string('telefone_cliente')->nullable();
             $table->string('endereco')->nullable();

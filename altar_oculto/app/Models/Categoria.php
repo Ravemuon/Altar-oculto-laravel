@@ -32,4 +32,9 @@ class Categoria extends Model
     {
         return $this->hasMany(Produto::class);
     }
+    // RELAÇÃO COM pontos (uma categoria tem muitos produtos)
+        public function pontos()
+    {
+        return $this->hasMany(Ponto::class);
+    }
 }

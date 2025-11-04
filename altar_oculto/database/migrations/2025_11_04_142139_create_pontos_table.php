@@ -9,11 +9,15 @@ return new class extends Migration {
     {
         Schema::create('pontos', function (Blueprint $table) {
             $table->id();
-            $table->string('titulo'); // Nome do ponto
-            $table->text('letra'); // Letra completa do ponto
-            $table->string('categoria')->nullable(); // Linha, entidade ou orixá
-            $table->string('autor')->nullable(); // Quem compôs o ponto
-            $table->string('audio')->nullable(); // Link para o áudio (YouTube, etc)
+            $table->string('nome');
+            $table->enum('tipo', ['cantado', 'riscado']);
+            $table->string('entidade')->nullable();
+            $table->string('funcao')->nullable();
+            $table->text('letra')->nullable();
+            $table->text('simbolo')->nullable();
+            $table->foreignId('categoria_id')->constrained()->onDelete('cascade');
+            $table->text('descricao')->nullable();
+            $table->string('audio')->nullable();
             $table->timestamps();
         });
     }

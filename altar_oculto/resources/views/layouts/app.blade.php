@@ -209,6 +209,7 @@
                 <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/categorias') }}">Categorias</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/produtos') }}">Produtos</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/pontos') }}">Pontos</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/encomendas') }}">Encomendas</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/contato') }}">Contato</a></li>
 
