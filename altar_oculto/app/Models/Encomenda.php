@@ -6,9 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Encomenda extends Model
 {
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     // Define os campos que podem ser preenchidos em massa
     // Isso permite criar ou atualizar registros usando arrays com esses campos
     protected $fillable = [
+        'user_id',
         'nome_cliente',
         'email_cliente',
         'telefone_cliente',

@@ -185,6 +185,17 @@
 @stack('styles')
 </head>
 <body>
+    @if(session('error'))
+    <div class="alert alert-danger text-center mt-3">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if(session('success'))
+    <div class="alert alert-success text-center mt-3">
+        {{ session('success') }}
+    </div>
+@endif
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light">
@@ -200,6 +211,26 @@
                 <li class="nav-item"><a class="nav-link" href="{{ url('/produtos') }}">Produtos</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/encomendas') }}">Encomendas</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url('/contato') }}">Contato</a></li>
+
+                    @auth
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold text-success" href="{{ route('usuarios.perfil') }}">
+                                👤 {{ Auth::user()->nome }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <form action="{{ route('usuarios.logout') }}" method="POST" class="d-inline">
+                                @csrf
+                                <button class="btn btn-link nav-link text-danger">Sair</button>
+                            </form>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold" href="{{ route('usuarios.login') }}">Entrar / Cadastrar</a>
+                        </li>
+                    @endauth
+                </ul>
+
             </ul>
         </div>
     </div>

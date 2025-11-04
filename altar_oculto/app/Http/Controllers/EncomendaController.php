@@ -5,9 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Encomenda;
 use App\Models\Produto;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EncomendaController extends Controller
 {
+    public function encomendas()
+    {
+        $usuarios = User::with('encomendas.itens.produto')->get();
+        $pdf = Pdf::loadView('relatorios.encomendas', compact('usuarios'));
+        return $pdf->stream('relatorio_encomendas.pdf');
+    }
+    
     // LISTA ENCOMENDAS COM OPÇÃO DE BUSCA
     public function index(Request $request)
     {
