@@ -57,38 +57,38 @@ class ProdutoController extends Controller
         return view('produtos.create', compact('categorias'));
     }
 
-    // SALVAR NOVO PRODUTO COM UPLOAD
+    // SALVAR NOVO PRODUTO COM UPLOAD OU URL
     public function store(Request $request)
-    {
-        $request->validate([
-            'nome' => 'required|min:3',
-            'descricao' => 'required',
-            'preco' => 'required|numeric',
-            'categoria_id' => 'required|exists:categorias,id',
-            'imagem_upload' => 'nullable|image|max:2048', // upload
-            'imagem' => 'nullable|url', // URL alternativa
-            'estoque' => 'nullable|numeric',
-            'codigo' => 'nullable|string',
-            'peso' => 'nullable|string',
-            'dimensoes' => 'nullable|string',
-            'tags' => 'nullable|string',
-            'popular' => 'nullable|boolean',
-            'ativo' => 'nullable|boolean',
-            'observacoes' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'nome' => 'required|min:3|max:255',
+        'descricao' => 'required',
+        'preco' => 'required|numeric|min:0|max:9999999999999.99',
+        'categoria_id' => 'required|exists:categorias,id',
+        'imagem_upload' => 'nullable|image|max:2048',
+        'imagem' => 'nullable|url',
+        'estoque' => 'nullable|numeric',
+        'codigo' => 'nullable|string',
+        'peso' => 'nullable|string',
+        'dimensoes' => 'nullable|string',
+        'tags' => 'nullable|string',
+        'observacoes' => 'nullable|string',
+    ]);
 
-        $dados = $request->all();
+    $dados = $request->only([
+        'nome','descricao','preco','categoria_id',
+        'imagem','estoque','codigo','peso','dimensoes','tags','observacoes'
+    ]);
 
-        // Tratar upload de imagem
-        if ($request->hasFile('imagem_upload')) {
-            $path = $request->file('imagem_upload')->store('produtos', 'public');
-            $dados['imagem'] = $path;
-        }
-
-        Produto::create($dados);
-
-        return redirect()->route('produtos.index')->with('success', 'Produto criado com sucesso!');
+    if ($request->hasFile('imagem_upload')) {
+        $path = $request->file('imagem_upload')->store('produtos', 'public');
+        $dados['imagem'] = $path;
     }
+
+    Produto::create($dados);
+
+    return redirect()->route('produtos.index')->with('success', 'Produto criado com sucesso!');
+}
 
     // FORMULÁRIO PARA EDITAR PRODUTO
     public function edit(Produto $produto)
@@ -97,39 +97,39 @@ class ProdutoController extends Controller
         return view('produtos.edit', compact('produto', 'categorias'));
     }
 
-    // ATUALIZAR PRODUTO COM UPLOAD
-    public function update(Request $request, Produto $produto)
-    {
-        $request->validate([
-            'nome' => 'required|min:3',
-            'descricao' => 'required',
-            'preco' => 'required|numeric',
-            'categoria_id' => 'required|exists:categorias,id',
-            'imagem_upload' => 'nullable|image|max:2048',
-            'imagem' => 'nullable|url',
-            'estoque' => 'nullable|numeric',
-            'codigo' => 'nullable|string',
-            'peso' => 'nullable|string',
-            'dimensoes' => 'nullable|string',
-            'tags' => 'nullable|string',
-            'popular' => 'nullable|boolean',
-            'ativo' => 'nullable|boolean',
-            'observacoes' => 'nullable|string',
-        ]);
+    // ATUALIZAR PRODUTO COM UPLOAD OU URL
+// UPDATE
+public function update(Request $request, Produto $produto)
+{
+    $request->validate([
+        'nome' => 'required|min:3|max:255',
+        'descricao' => 'required',
+        'preco' => 'required|numeric|min:0|max:9999999999999.99',
+        'categoria_id' => 'required|exists:categorias,id',
+        'imagem_upload' => 'nullable|image|max:2048',
+        'imagem' => 'nullable|url',
+        'estoque' => 'nullable|numeric',
+        'codigo' => 'nullable|string',
+        'peso' => 'nullable|string',
+        'dimensoes' => 'nullable|string',
+        'tags' => 'nullable|string',
+        'observacoes' => 'nullable|string',
+    ]);
 
-        $dados = $request->all();
+    $dados = $request->only([
+        'nome','descricao','preco','categoria_id',
+        'imagem','estoque','codigo','peso','dimensoes','tags','observacoes'
+    ]);
 
-        // Tratar upload de imagem
-        if ($request->hasFile('imagem_upload')) {
-            $path = $request->file('imagem_upload')->store('produtos', 'public');
-            $dados['imagem'] = $path;
-        }
-
-        $produto->update($dados);
-
-        return redirect()->route('produtos.index')->with('success', 'Produto atualizado com sucesso!');
+    if ($request->hasFile('imagem_upload')) {
+        $path = $request->file('imagem_upload')->store('produtos', 'public');
+        $dados['imagem'] = $path;
     }
 
+    $produto->update($dados);
+
+    return redirect()->route('produtos.index')->with('success', 'Produto atualizado com sucesso!');
+    }
     // EXCLUIR PRODUTO
     public function destroy(Produto $produto)
     {

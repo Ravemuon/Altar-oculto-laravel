@@ -23,7 +23,7 @@
     @endif
 
     <div class="card card-umbanda p-4 shadow-lg mx-auto" style="max-width: 600px;">
-        <form action="{{ route('produtos.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('produtos.store') }}" method="POST" enctype="multipart/form-data" id="formProduto">
             @csrf
 
             <div class="mb-3">
@@ -56,13 +56,18 @@
             {{-- Upload de imagem --}}
             <div class="mb-3">
                 <label class="form-label fw-bold">Imagem (Upload)</label>
-                <input type="file" name="imagem_upload" class="form-control">
+                <input type="file" name="imagem_upload" class="form-control" id="imagemUpload">
             </div>
 
             {{-- URL da imagem --}}
             <div class="mb-3">
                 <label class="form-label fw-bold">Imagem (URL)</label>
-                <input type="url" name="imagem" class="form-control" value="{{ old('imagem') }}">
+                <input type="url" name="imagem" class="form-control" id="imagemURL" value="{{ old('imagem') }}">
+            </div>
+
+            {{-- Pré-visualização da imagem --}}
+            <div class="mb-3 text-center">
+                <img id="previewImagem" src="{{ old('imagem') ?? '#' }}" alt="Pré-visualização" style="max-width: 100%; max-height: 300px; border-radius: 0.5rem; {{ old('imagem') ? '' : 'display:none;' }}">
             </div>
 
             {{-- Botão salvar --}}
@@ -72,4 +77,40 @@
         </form>
     </div>
 </div>
+
+{{-- JS para pré-visualização da imagem --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadInput = document.getElementById('imagemUpload');
+    const urlInput = document.getElementById('imagemURL');
+    const preview = document.getElementById('previewImagem');
+
+    // Upload de imagem
+    uploadInput.addEventListener('change', function() {
+        urlInput.value = '';
+        const file = this.files[0];
+        if(file){
+            const reader = new FileReader();
+            reader.onload = function(e){
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+
+    // URL da imagem
+    urlInput.addEventListener('input', function() {
+        uploadInput.value = '';
+        if(this.value){
+            preview.src = this.value;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+});
+</script>
 @endsection
