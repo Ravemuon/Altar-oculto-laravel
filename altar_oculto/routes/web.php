@@ -118,11 +118,12 @@ Route::prefix('relatorios')->name('relatorios.')->group(function() {
     Route::get('/abrir/{tipo}', [RelatorioController::class, 'abrir'])->name('abrir');
 
     // Previews
-    Route::get('/estoque-fornecedor', [RelatorioController::class, 'previewEstoqueFornecedor'])->name('preview-estoque-fornecedor');
     Route::get('/produtos', [RelatorioController::class, 'previewProdutos'])->name('preview-produtos');
     Route::get('/encomendas', [RelatorioController::class, 'previewEncomendas'])->name('preview-encomendas');
     Route::get('/categorias', [RelatorioController::class, 'previewCategorias'])->name('preview-categorias');
     Route::get('/pontos', [RelatorioController::class, 'previewPontos'])->name('preview-pontos');
+    Route::get('/estoque-fornecedor', [RelatorioController::class, 'previewEstoqueFornecedor'])
+        ->name('preview-estoque-fornecedor');
 
     // Download PDFs
     Route::get('/download/{tipo}', [RelatorioController::class, 'downloadPDF'])->name('download-pdf');

@@ -22,7 +22,7 @@ class RelatorioController extends Controller
     // Redirecionamento genérico
     public function abrir($tipo)
     {
-        switch($tipo) {
+        switch ($tipo) {
             case 'estoque':
                 return redirect()->route('relatorio.preview-estoque-fornecedor');
             case 'produtos':
@@ -59,7 +59,10 @@ class RelatorioController extends Controller
     // Preview Encomendas
     public function previewEncomendas()
     {
-        $encomendas = EncomendaItem::with(['encomenda', 'produto'])->orderBy('created_at', 'desc')->get();
+        $encomendas = EncomendaItem::with(['encomenda', 'produto'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return Pdf::loadView('relatorios.encomendas', compact('encomendas'))->stream();
     }
 
@@ -70,26 +73,49 @@ class RelatorioController extends Controller
         return Pdf::loadView('relatorios.categorias', compact('categorias'))->stream();
     }
 
-    // Preview Pontos
+    // ✅ Preview Pontos — corrigido para não depender de usuario_id
     public function previewPontos()
     {
-        $usuarios = Usuario::with('pontos')->get();
-        return Pdf::loadView('relatorios.pontos', compact('usuarios'))->stream();
+        $pontos = Ponto::with('categoria')->orderBy('nome')->get();
+
+        return Pdf::loadView('relatorios.pontos', compact('pontos'))->stream();
     }
 
-    // Download PDF
+    // ✅ Download PDF — ajustado para enviar os dados certos à view
     public function downloadPDF($tipo)
     {
-        switch($tipo) {
-            case 'estoque': $view = 'relatorios.estoque-fornecedor'; break;
-            case 'produtos': $view = 'relatorios.produtos'; break;
-            case 'encomendas': $view = 'relatorios.encomendas'; break;
-            case 'categorias': $view = 'relatorios.categorias'; break;
-            case 'pontos': $view = 'relatorios.pontos'; break;
-            default: abort(404);
+        switch ($tipo) {
+            case 'estoque':
+                $fornecedor = auth()->user();
+                $dados = ['produtos' => Estoque::where('user_id', $fornecedor->id)->with('produto.categoria')->get(), 'fornecedor' => $fornecedor];
+                $view = 'relatorios.estoque-fornecedor';
+                break;
+
+            case 'produtos':
+                $dados = ['produtos' => Produto::with('categoria')->get()];
+                $view = 'relatorios.produtos';
+                break;
+
+            case 'encomendas':
+                $dados = ['encomendas' => EncomendaItem::with(['encomenda', 'produto'])->orderBy('created_at', 'desc')->get()];
+                $view = 'relatorios.encomendas';
+                break;
+
+            case 'categorias':
+                $dados = ['categorias' => Categoria::withCount('produtos')->get()];
+                $view = 'relatorios.categorias';
+                break;
+
+            case 'pontos':
+                $dados = ['pontos' => Ponto::with('categoria')->orderBy('nome')->get()];
+                $view = 'relatorios.pontos';
+                break;
+
+            default:
+                abort(404);
         }
 
-        $pdf = Pdf::loadView($view);
+        $pdf = Pdf::loadView($view, $dados);
         return $pdf->download("relatorio_{$tipo}.pdf");
     }
 }

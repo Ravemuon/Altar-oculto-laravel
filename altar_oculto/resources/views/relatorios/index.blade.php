@@ -23,10 +23,11 @@
                 <div class="card-body d-flex flex-column">
                     <h4 class="card-title">{{ $nome }}</h4>
                     <div class="mb-3">
-                        <a href="{{ route("relatorio.$rota") }}" target="_blank" class="btn btn-primary me-2 mb-2">👁️ Visualizar PDF</a>
-                        <a href="{{ route('relatorio.download-pdf', explode('-', $rota)[1]) }}" class="btn btn-success mb-2">📥 Download PDF</a>
+                        {{-- Corrigido: prefixo plural "relatorios." --}}
+                        <a href="{{ route("relatorios.$rota") }}" target="_blank" class="btn btn-primary me-2 mb-2">👁️ Visualizar PDF</a>
+                        <a href="{{ route('relatorios.download-pdf', explode('-', $rota)[1]) }}" class="btn btn-success mb-2">📥 Download PDF</a>
                     </div>
-                    <iframe src="{{ route("relatorio.$rota") }}" style="width: 100%; height: 350px; border-radius: 8px;" frameborder="0"></iframe>
+                    <iframe src="{{ route("relatorios.$rota") }}" style="width: 100%; height: 350px; border-radius: 8px;" frameborder="0"></iframe>
                 </div>
             </div>
         </div>

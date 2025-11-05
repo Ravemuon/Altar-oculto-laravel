@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ProdutoController extends Controller
 {
-    // PÁGINA INICIAL (HOME)
+    // 🏠 Página Inicial (Home)
     public function home()
     {
         $categorias = Categoria::all();
@@ -21,7 +21,7 @@ class ProdutoController extends Controller
         return view('welcome', compact('categorias', 'produtos', 'encomendas', 'produtosRecentes'));
     }
 
-    // LISTAR TODOS OS PRODUTOS
+    // 📋 Listar todos os produtos
     public function index(Request $request)
     {
         $query = Produto::query();
@@ -44,96 +44,101 @@ class ProdutoController extends Controller
         return view('produtos.index', compact('produtos', 'categorias'));
     }
 
-    // MOSTRAR DETALHES DE UM PRODUTO
+    // 🔍 Mostrar detalhes de um produto
     public function show(Produto $produto)
     {
         return view('produtos.show', compact('produto'));
     }
 
-    // FORMULÁRIO PARA CRIAR PRODUTO
+    // ➕ Formulário para criar produto
     public function create()
     {
         $categorias = Categoria::all();
         return view('produtos.create', compact('categorias'));
     }
 
-    // SALVAR NOVO PRODUTO COM UPLOAD OU URL
+    // 💾 Salvar novo produto (com upload ou URL)
     public function store(Request $request)
-{
-    $request->validate([
-        'nome' => 'required|min:3|max:255',
-        'descricao' => 'required',
-        'preco' => 'required|numeric|min:0|max:9999999999999.99',
-        'categoria_id' => 'required|exists:categorias,id',
-        'imagem_upload' => 'nullable|image|max:2048',
-        'imagem' => 'nullable|url',
-        'estoque' => 'nullable|numeric',
-        'codigo' => 'nullable|string',
-        'peso' => 'nullable|string',
-        'dimensoes' => 'nullable|string',
-        'tags' => 'nullable|string',
-        'observacoes' => 'nullable|string',
-    ]);
+    {
+        $request->validate([
+            'nome' => 'required|min:3|max:255',
+            'descricao' => 'required',
+            'preco' => 'required|numeric|min:0|max:9999999999999.99',
+            'categoria_id' => 'required|exists:categorias,id',
+            'imagem_upload' => 'nullable|image|max:2048',
+            'imagem' => 'nullable|url',
+            'estoque' => 'nullable|numeric',
+            'codigo' => 'nullable|string',
+            'peso' => 'nullable|string',
+            'dimensoes' => 'nullable|string',
+            'tags' => 'nullable|string',
+            'observacoes' => 'nullable|string',
+        ]);
 
-    $dados = $request->only([
-        'nome','descricao','preco','categoria_id',
-        'imagem','estoque','codigo','peso','dimensoes','tags','observacoes'
-    ]);
+        $dados = $request->only([
+            'nome', 'descricao', 'preco', 'categoria_id',
+            'imagem', 'estoque', 'codigo', 'peso', 'dimensoes', 'tags', 'observacoes'
+        ]);
 
-    if ($request->hasFile('imagem_upload')) {
-        $path = $request->file('imagem_upload')->store('produtos', 'public');
-        $dados['imagem'] = $path;
+        if ($request->hasFile('imagem_upload')) {
+            $path = $request->file('imagem_upload')->store('produtos', 'public');
+            $dados['imagem'] = $path;
+        }
+
+        Produto::create($dados);
+
+        return redirect()->route('produtos.index')->with('success', 'Produto criado com sucesso!');
     }
 
-    Produto::create($dados);
-
-    return redirect()->route('produtos.index')->with('success', 'Produto criado com sucesso!');
-}
-
-    // FORMULÁRIO PARA EDITAR PRODUTO
+    // ✏️ Formulário para editar produto
     public function edit(Produto $produto)
     {
         $categorias = Categoria::all();
         return view('produtos.edit', compact('produto', 'categorias'));
     }
 
-    // ATUALIZAR PRODUTO COM UPLOAD OU URL
-// UPDATE
-public function update(Request $request, Produto $produto)
-{
-    $request->validate([
-        'nome' => 'required|min:3|max:255',
-        'descricao' => 'required',
-        'preco' => 'required|numeric|min:0|max:9999999999999.99',
-        'categoria_id' => 'required|exists:categorias,id',
-        'imagem_upload' => 'nullable|image|max:2048',
-        'imagem' => 'nullable|url',
-        'estoque' => 'nullable|numeric',
-        'codigo' => 'nullable|string',
-        'peso' => 'nullable|string',
-        'dimensoes' => 'nullable|string',
-        'tags' => 'nullable|string',
-        'observacoes' => 'nullable|string',
-    ]);
+    // 🔄 Atualizar produto
+    public function update(Request $request, Produto $produto)
+    {
+        $request->validate([
+            'nome' => 'required|min:3|max:255',
+            'descricao' => 'required',
+            'preco' => 'required|numeric|min:0|max:9999999999999.99',
+            'categoria_id' => 'required|exists:categorias,id',
+            'imagem_upload' => 'nullable|image|max:2048',
+            'imagem' => 'nullable|url',
+            'estoque' => 'nullable|numeric',
+            'codigo' => 'nullable|string',
+            'peso' => 'nullable|string',
+            'dimensoes' => 'nullable|string',
+            'tags' => 'nullable|string',
+            'observacoes' => 'nullable|string',
+        ]);
 
-    $dados = $request->only([
-        'nome','descricao','preco','categoria_id',
-        'imagem','estoque','codigo','peso','dimensoes','tags','observacoes'
-    ]);
+        $dados = $request->only([
+            'nome', 'descricao', 'preco', 'categoria_id',
+            'imagem', 'estoque', 'codigo', 'peso', 'dimensoes', 'tags', 'observacoes'
+        ]);
 
-    if ($request->hasFile('imagem_upload')) {
-        $path = $request->file('imagem_upload')->store('produtos', 'public');
-        $dados['imagem'] = $path;
+        if ($request->hasFile('imagem_upload')) {
+            $path = $request->file('imagem_upload')->store('produtos', 'public');
+            $dados['imagem'] = $path;
+        }
+
+        $produto->update($dados);
+
+        return redirect()->route('produtos.index')->with('success', 'Produto atualizado com sucesso!');
     }
 
-    $produto->update($dados);
-
-    return redirect()->route('produtos.index')->with('success', 'Produto atualizado com sucesso!');
-    }
-    // EXCLUIR PRODUTO
+    // ❌ Excluir produto
     public function destroy(Produto $produto)
     {
+        if ($produto->imagem && Storage::disk('public')->exists($produto->imagem)) {
+            Storage::disk('public')->delete($produto->imagem);
+        }
+
         $produto->delete();
+
         return redirect()->route('produtos.index')->with('success', 'Produto excluído com sucesso!');
     }
 }
