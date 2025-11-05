@@ -24,4 +24,6 @@ class EncomendaItem extends Model
     {
         return $this->belongsTo(Produto::class);
     }
+
+
 }

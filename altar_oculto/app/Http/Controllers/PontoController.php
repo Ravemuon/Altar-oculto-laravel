@@ -8,107 +8,126 @@ use App\Models\Categoria;
 
 class PontoController extends Controller
 {
-    // LISTAGEM DE PONTOS (com filtro opcional por categoria e pesquisa)
+    /**
+     * Exibe a lista de pontos.
+     */
     public function index(Request $request)
     {
-        $query = Ponto::with('categoria'); // eager loading da categoria
+        // Pegando todas as categorias para o filtro
+        $categorias = Categoria::orderBy('nome')->get();
 
-        // Filtra por categoria se informado na query string
-        if ($request->query('categoria_id')) {
-            $query->where('categoria_id', $request->query('categoria_id'));
+        // Query base para pontos, já com categoria carregada
+        $query = Ponto::with('categoria')->orderBy('nome');
+
+        // Filtro por categoria
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
         }
 
-        // Filtra por busca no nome
-        if ($request->query('search')) {
-            $search = $request->query('search');
-            $query->where('nome', 'like', "%{$search}%");
+        // Pesquisa por nome
+        if ($request->filled('search')) {
+            $query->where('nome', 'like', '%' . $request->search . '%');
         }
 
-        $pontos = $query->orderBy('nome')->get(); // ordena por nome
-        $categorias = Categoria::all();
+        // Paginação opcional ou get()
+        $pontos = $query->get();
 
         return view('pontos.index', compact('pontos', 'categorias'));
     }
 
-    // MOSTRAR PONTOS DE UMA CATEGORIA ESPECÍFICA
-    public function categoria(Categoria $categoria)
+    /**
+     * Exibe um ponto específico.
+     */
+    public function show($id)
     {
-        $pontos = $categoria->pontos()->orderBy('nome')->get();
-        return view('pontos.categoria', compact('categoria', 'pontos'));
+        $ponto = Ponto::with('categoria')->findOrFail($id);
+
+        return view('pontos.show', compact('ponto'));
     }
 
-    // FORMULÁRIO DE CRIAÇÃO
+    /**
+     * Formulário de criação de ponto.
+     */
     public function create()
     {
-        $categorias = Categoria::all();
+        $categorias = Categoria::orderBy('nome')->get();
         return view('pontos.create', compact('categorias'));
     }
 
-    // SALVAR NOVO PONTO
+    /**
+     * Armazena o ponto criado.
+     */
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'nome' => 'required|string|max:255',
-            'tipo' => 'required|in:cantado,riscado',
-            'entidade' => 'nullable|string|max:255',
+            'tipo' => 'nullable|string|max:255',
             'funcao' => 'nullable|string|max:255',
+            'entidade' => 'nullable|string|max:255',
+            'categoria_id' => 'nullable|exists:categorias,id',
+            'descricao' => 'nullable|string',
             'letra' => 'nullable|string',
             'simbolo' => 'nullable|string',
-            'categoria_id' => 'required|exists:categorias,id',
-            'descricao' => 'nullable|string',
             'audio' => 'nullable|file|mimes:mp3,wav',
         ]);
 
+        // Upload do áudio, se houver
         if ($request->hasFile('audio')) {
-            $data['audio'] = $request->file('audio')->store('audios', 'public');
+            $validated['audio'] = $request->file('audio')->store('pontos', 'public');
         }
 
-        Ponto::create($data);
+        Ponto::create($validated);
 
         return redirect()->route('pontos.index')->with('success', 'Ponto criado com sucesso!');
     }
 
-    // FORMULÁRIO DE EDIÇÃO
-    public function edit(Ponto $ponto)
+    /**
+     * Formulário de edição de ponto.
+     */
+    public function edit($id)
     {
-        $categorias = Categoria::all();
+        $ponto = Ponto::findOrFail($id);
+        $categorias = Categoria::orderBy('nome')->get();
+
         return view('pontos.edit', compact('ponto', 'categorias'));
     }
 
-    // ATUALIZAR PONTO
-    public function update(Request $request, Ponto $ponto)
+    /**
+     * Atualiza o ponto.
+     */
+    public function update(Request $request, $id)
     {
-        $data = $request->validate([
+        $ponto = Ponto::findOrFail($id);
+
+        $validated = $request->validate([
             'nome' => 'required|string|max:255',
-            'tipo' => 'required|in:cantado,riscado',
-            'entidade' => 'nullable|string|max:255',
+            'tipo' => 'nullable|string|max:255',
             'funcao' => 'nullable|string|max:255',
+            'entidade' => 'nullable|string|max:255',
+            'categoria_id' => 'nullable|exists:categorias,id',
+            'descricao' => 'nullable|string',
             'letra' => 'nullable|string',
             'simbolo' => 'nullable|string',
-            'categoria_id' => 'required|exists:categorias,id',
-            'descricao' => 'nullable|string',
             'audio' => 'nullable|file|mimes:mp3,wav',
         ]);
 
         if ($request->hasFile('audio')) {
-            $data['audio'] = $request->file('audio')->store('audios', 'public');
+            $validated['audio'] = $request->file('audio')->store('pontos', 'public');
         }
 
-        $ponto->update($data);
+        $ponto->update($validated);
 
         return redirect()->route('pontos.index')->with('success', 'Ponto atualizado com sucesso!');
     }
 
-    // EXCLUIR PONTO
-    public function destroy(Ponto $ponto)
+    /**
+     * Deleta o ponto.
+     */
+    public function destroy($id)
     {
+        $ponto = Ponto::findOrFail($id);
         $ponto->delete();
-        return redirect()->route('pontos.index')->with('success', 'Ponto excluído com sucesso!');
-    }
 
-    // MOSTRAR DETALHES DO PONTO
-    public function show(Ponto $ponto)
-    {
-        return view('pontos.show', compact('ponto'));
+        return redirect()->route('pontos.index')->with('success', 'Ponto excluído com sucesso!');
     }
 }

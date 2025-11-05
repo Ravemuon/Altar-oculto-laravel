@@ -7,6 +7,9 @@ use App\Models\Usuario;
 use App\Models\Fornecedor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image; // Import da biblioteca
+use Illuminate\Support\Str;
 
 class UsuarioController extends Controller
 {
@@ -78,18 +81,23 @@ class UsuarioController extends Controller
     public function uploadImagem(Request $request)
     {
         $request->validate([
-            'imagem' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imagem' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $user = Auth::user();
+        $usuario = Auth::user();
 
-        if ($request->hasFile('imagem')) {
-            $imagem = $request->file('imagem')->store('perfil', 'public');
-            $user->imagem = $imagem;
-            $user->save();
+        // Apaga imagem antiga se existir
+        if ($usuario->imagem && Storage::disk('public')->exists($usuario->imagem)) {
+            Storage::disk('public')->delete($usuario->imagem);
         }
 
-        return back()->with('success', 'Imagem de perfil atualizada com sucesso!');
+        // Salva a nova imagem na pasta storage/app/public/usuarios
+        $caminho = $request->file('imagem')->store('usuarios', 'public');
+
+        $usuario->imagem = $caminho;
+        $usuario->save();
+
+        return back()->with('success', 'Foto atualizada com sucesso!');
     }
 
     // Página de formulário para cadastro de fornecedor
@@ -98,7 +106,7 @@ class UsuarioController extends Controller
         return view('usuarios.fornecedor');
     }
 
-    // Salvar usuário fornecedor com código e criação de empresa
+    // Salvar usuário fornecedor
     public function storeFornecedor(Request $request)
     {
         $codigoAutorizacao = 'FORNECEDOR123'; // código pré-definido

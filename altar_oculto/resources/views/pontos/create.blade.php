@@ -55,7 +55,7 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Áudio</label>
+            <label class="form-label">Áudio (.mp3 ou .wav)</label>
             <input type="file" name="audio" class="form-control" accept=".mp3,.wav">
         </div>
 

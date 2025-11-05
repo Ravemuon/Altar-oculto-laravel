@@ -13,7 +13,7 @@ class Usuario extends Authenticatable
         'nome',
         'email',
         'senha',
-        'fornecedor_id', // precisa estar aqui
+        'fornecedor_id',
         'imagem',
     ];
 
@@ -27,4 +27,9 @@ class Usuario extends Authenticatable
     {
         return $this->belongsTo(Fornecedor::class);
     }
+    public function pontos()
+    {
+        return $this->hasMany(Ponto::class);
+    }
+
 }

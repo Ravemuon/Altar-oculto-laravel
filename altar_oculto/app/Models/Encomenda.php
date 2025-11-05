@@ -29,4 +29,10 @@ class Encomenda extends Model
     {
         return $this->hasMany(EncomendaItem::class);
     }
+
+    public function cliente()
+    {
+        return $this->belongsTo(User::class, 'user_id'); // Ajuste 'user_id' conforme seu DB
+    }
+
 }

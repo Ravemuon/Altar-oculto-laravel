@@ -20,5 +20,5 @@ class Fornecedor extends Model
                     ->withPivot('quantidade')
                     ->withTimestamps();
     }
-        
+    
 }

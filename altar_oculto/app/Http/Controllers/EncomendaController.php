@@ -56,7 +56,7 @@ class EncomendaController extends Controller
 
         // Cria a encomenda
         $encomenda = Encomenda::create([
-            'user_id' => Auth::id(),
+            'usuario_id' => Auth::id(),
             'nome_cliente' => $request->nome_cliente,
             'email_cliente' => $request->email_cliente,
             'telefone_cliente' => $request->telefone_cliente,
@@ -100,7 +100,7 @@ class EncomendaController extends Controller
         return view('encomendas.edit', compact('encomenda'));
     }
 
-    // ATUALIZA INFORMAÇÕES DO CLIENTE 
+    // ATUALIZA INFORMAÇÕES DO CLIENTE
     public function update(Request $request, Encomenda $encomenda)
     {
         $request->validate([

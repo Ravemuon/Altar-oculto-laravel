@@ -10,7 +10,8 @@ use App\Http\Controllers\{
     RelatorioController,
     UsuarioController,
     PontoController,
-    FornecedorController
+    FornecedorController,
+    DashboardController
 };
 
 // -----------------------------
@@ -29,48 +30,53 @@ Route::get('/login', [UsuarioController::class, 'login'])->name('usuarios.login'
 Route::post('/login', [UsuarioController::class, 'loginSubmit'])->name('usuarios.login.submit');
 Route::post('/logout', [UsuarioController::class, 'logout'])->name('usuarios.logout');
 
-Route::middleware('auth')->group(function () {
+// Upload de imagem (com middleware auth)
+Route::post('/usuarios/upload-imagem', [UsuarioController::class, 'uploadImagem'])
+    ->name('usuarios.upload_imagem')
+    ->middleware('auth');
+
+// Rotas protegidas para usuários logados
+Route::middleware('auth')->group(function() {
     Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('usuarios.perfil');
-    Route::post('/upload-imagem', [UsuarioController::class, 'uploadImagem'])->name('usuarios.upload_imagem');
     Route::get('/{id}/edit', [UsuarioController::class, 'edit'])->name('usuarios.edit');
     Route::put('/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
 });
+
+// -----------------------------
+// FORNECEDORES
+// -----------------------------
 Route::prefix('fornecedores')->middleware('auth')->group(function () {
-
-    // Perfil do fornecedor (mesmo do usuário)
-    Route::get('/perfil', [UsuarioController::class, 'perfil'])
-        ->name('fornecedores.perfil');
-
-    // Listar fornecedores
     Route::get('/', [FornecedorController::class, 'index'])->name('fornecedores.index');
-
-    // Criar fornecedor
     Route::get('/create', [FornecedorController::class, 'create'])->name('fornecedores.create');
     Route::post('/', [FornecedorController::class, 'store'])->name('fornecedores.store');
-
-    // Editar fornecedor
     Route::get('/{fornecedor}/edit', [FornecedorController::class, 'edit'])->name('fornecedores.edit');
     Route::put('/{fornecedor}', [FornecedorController::class, 'update'])->name('fornecedores.update');
-
-    // Excluir fornecedor
     Route::delete('/{fornecedor}', [FornecedorController::class, 'destroy'])->name('fornecedores.destroy');
 
+    // Perfil do fornecedor
+    Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('fornecedores.perfil');
+
     // Estoque do fornecedor
-    Route::get('/estoque', [FornecedorController::class, 'estoque'])->name('fornecedores.estoque'); // lista estoque
-    Route::get('/estoque/adicionar', [FornecedorController::class, 'adicionarEstoque'])->name('fornecedores.adicionar-estoque'); // formulário
-    Route::post('/estoque', [FornecedorController::class, 'salvarEstoque'])->name('fornecedores.salvar-estoque'); // salvar produto
-    Route::get('/estoque/{produto}/editar', [FornecedorController::class, 'editarEstoque'])->name('fornecedores.editar-estoque'); // editar quantidade
-    Route::put('/estoque/{produto}', [FornecedorController::class, 'atualizarEstoque'])->name('fornecedores.atualizar-estoque'); // atualizar quantidade
-    Route::delete('/estoque/{produto}', [FornecedorController::class, 'removerEstoque'])->name('fornecedores.remover-estoque'); // remover produto
+    Route::get('/estoque', [FornecedorController::class, 'estoque'])->name('fornecedores.estoque');
+    Route::get('/estoque/adicionar', [FornecedorController::class, 'adicionarEstoque'])->name('fornecedores.adicionar-estoque');
+    Route::post('/estoque', [FornecedorController::class, 'salvarEstoque'])->name('fornecedores.salvar-estoque');
+    Route::get('/estoque/{produto}/editar', [FornecedorController::class, 'editarEstoque'])->name('fornecedores.editar-estoque');
+    Route::put('/estoque/{produto}', [FornecedorController::class, 'atualizarEstoque'])->name('fornecedores.atualizar-estoque');
+    Route::delete('/estoque/{estoque}', [FornecedorController::class, 'removerEstoque'])->name('fornecedores.remover-estoque');
 
     // Produtos do sistema (para adicionar ao estoque)
     Route::get('/produtos', [FornecedorController::class, 'produtosSistema'])->name('fornecedores.produtos');
+
+    // Adicionar todos os produtos do fornecedor ao estoque da loja
+    Route::post('/estoque/adicionar-loja', [FornecedorController::class, 'adicionarEstoqueNaLoja'])->name('fornecedores.adicionar-estoque-loja');
 });
+
 // -----------------------------
 // CATEGORIAS / PRODUTOS
 // -----------------------------
 Route::resource('categorias', CategoriaController::class);
 Route::resource('produtos', ProdutoController::class);
+Route::get('/produtos/tabela', [ProdutoController::class, 'tabela'])->name('c');
 
 // -----------------------------
 // PONTOS
@@ -107,10 +113,19 @@ Route::prefix('encomendas')->group(function () {
 // -----------------------------
 // RELATÓRIOS
 // -----------------------------
-Route::prefix('relatorios')->group(function () {
-    Route::get('/', [RelatorioController::class, 'index'])->name('relatorios.index');
-    Route::get('/estoque', [RelatorioController::class, 'estoque'])->name('relatorios.estoque');
-    Route::get('/encomendas', [RelatorioController::class, 'encomendas'])->name('relatorios.encomendas');
+Route::prefix('relatorios')->name('relatorios.')->group(function() {
+    Route::get('/', [RelatorioController::class, 'index'])->name('index');
+    Route::get('/abrir/{tipo}', [RelatorioController::class, 'abrir'])->name('abrir');
+
+    // Previews
+    Route::get('/estoque-fornecedor', [RelatorioController::class, 'previewEstoqueFornecedor'])->name('preview-estoque-fornecedor');
+    Route::get('/produtos', [RelatorioController::class, 'previewProdutos'])->name('preview-produtos');
+    Route::get('/encomendas', [RelatorioController::class, 'previewEncomendas'])->name('preview-encomendas');
+    Route::get('/categorias', [RelatorioController::class, 'previewCategorias'])->name('preview-categorias');
+    Route::get('/pontos', [RelatorioController::class, 'previewPontos'])->name('preview-pontos');
+
+    // Download PDFs
+    Route::get('/download/{tipo}', [RelatorioController::class, 'downloadPDF'])->name('download-pdf');
 });
 
 // -----------------------------
@@ -123,4 +138,18 @@ Route::prefix('carrinho')->group(function () {
     Route::post('/limpar', [CarrinhoController::class, 'limpar'])->name('carrinho.limpar');
     Route::post('/atualizar/{id}', [CarrinhoController::class, 'atualizarItem'])->name('carrinho.atualizarItem');
     Route::delete('/removerItem/{id}', [CarrinhoController::class, 'removerItem'])->name('carrinho.removerItem');
+});
+
+// Dashboard
+Route::prefix('dashboard')->name('dashboard.')->group(function() {
+    Route::get('/', [DashboardController::class, 'index'])->name('index');
+    Route::get('/vendas-mensais', [DashboardController::class, 'vendasMensais'])->name('vendas-mensais');
+    Route::get('/produtos-mais-vendidos', [DashboardController::class, 'produtosMaisVendidos'])->name('produtos-mais-vendidos');
+});
+
+// Relatórios (preview)
+Route::prefix('relatorios')->name('relatorios.')->group(function() {
+    Route::get('/estoque-fornecedor', [RelatorioController::class, 'previewEstoqueFornecedor'])->name('preview-estoque-fornecedor');
+    Route::get('/produtos', [RelatorioController::class, 'previewProdutos'])->name('preview-produtos');
+    Route::get('/encomendas', [RelatorioController::class, 'previewEncomendas'])->name('preview-encomendas');
 });

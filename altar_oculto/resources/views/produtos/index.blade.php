@@ -4,16 +4,12 @@
 @section('content')
 <div class="container">
     <div class="text-center my-4">
-        <a href="{{ route('relatorios.index') }}" class="btn btn-outline-dark shadow-sm">
-            📈 Ver Gráficos de Relatórios
-        </a>
-    </div>
-
     <!-- Título da página -->
     <h1 class="mb-5 text-umbanda text-center">Gerenciar Produtos</h1>
 
     {{-- Seção de botões: Novo Produto, Pesquisar e Filtrar --}}
     <div class="d-flex justify-content-center mb-5 gap-3 flex-wrap">
+         <a href="{{ route('dashboard.index') }}" class="btn btn-umbanda btn-lg shadow">📊 Dashboard</a>
         <a href="{{ route('produtos.create') }}" class="btn btn-umbanda btn-lg shadow">+ Novo Produto</a>
 
         <form action="{{ route('produtos.index') }}" method="GET" class="d-flex">

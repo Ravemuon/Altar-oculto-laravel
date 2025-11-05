@@ -44,4 +44,8 @@ class Produto extends Model
                     ->withPivot('quantidade')
                     ->withTimestamps();
     }
+    public function estoques()
+    {
+        return $this->hasMany(Estoque::class, 'produto_id');
+    }
 }

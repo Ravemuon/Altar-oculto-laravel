@@ -3,59 +3,93 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Produto;
+use App\Models\Estoque;
 use App\Models\EncomendaItem;
-use ArielMejiaDev\LarapexCharts\LarapexChart;
-use Carbon\Carbon;
-use DB;
+use App\Models\Categoria;
+use App\Models\Usuario;
+use App\Models\Ponto;
 
 class RelatorioController extends Controller
 {
-    // === Gráfico 1: Produtos mais vendidos ===
-    public function graficoProdutosMaisVendidos()
+    // Página principal com iframes
+    public function index()
     {
-        $dados = EncomendaItem::select('produto_id', DB::raw('SUM(quantidade) as total'))
-            ->groupBy('produto_id')
-            ->orderByDesc('total')
-            ->take(5)
-            ->with('produto')
-            ->get();
-
-        $nomes = $dados->pluck('produto.nome')->toArray();
-        $quantidades = $dados->pluck('total')->toArray();
-
-        $chart = (new LarapexChart)->barChart()
-            ->setTitle('Top 5 Produtos Mais Vendidos')
-            ->setSubtitle('Baseado nas encomendas')
-            ->addData('Quantidade Vendida', $quantidades)
-            ->setXAxis($nomes);
-
-        return $chart;
+        return view('relatorios.index');
     }
 
-    // === Gráfico 2: Faturamento Mensal ===
-    public function graficoFaturamentoMensal()
+    // Redirecionamento genérico
+    public function abrir($tipo)
     {
-        $dados = EncomendaItem::select(
-            DB::raw('MONTH(created_at) as mes'),
-            DB::raw('SUM(subtotal) as total')
-        )
-            ->groupBy('mes')
-            ->orderBy('mes')
+        switch($tipo) {
+            case 'estoque':
+                return redirect()->route('relatorio.preview-estoque-fornecedor');
+            case 'produtos':
+                return redirect()->route('relatorio.preview-produtos');
+            case 'encomendas':
+                return redirect()->route('relatorio.preview-encomendas');
+            case 'categorias':
+                return redirect()->route('relatorio.preview-categorias');
+            case 'pontos':
+                return redirect()->route('relatorio.preview-pontos');
+            default:
+                abort(404);
+        }
+    }
+
+    // Preview Estoque do fornecedor
+    public function previewEstoqueFornecedor()
+    {
+        $fornecedor = auth()->user();
+        $produtos = Estoque::where('user_id', $fornecedor->id)
+            ->with('produto.categoria')
             ->get();
 
-        $meses = $dados->pluck('mes')->map(function ($m) {
-            return Carbon::create()->month($m)->translatedFormat('F');
-        })->toArray();
+        return Pdf::loadView('relatorios.estoque-fornecedor', compact('produtos', 'fornecedor'))->stream();
+    }
 
-        $totais = $dados->pluck('total')->toArray();
+    // Preview Produtos
+    public function previewProdutos()
+    {
+        $produtos = Produto::with('categoria')->get();
+        return Pdf::loadView('relatorios.produtos', compact('produtos'))->stream();
+    }
 
-        $chart = (new LarapexChart)->areaChart()
-            ->setTitle('Faturamento Mensal')
-            ->setSubtitle('Total em R$ por mês')
-            ->addData('Faturamento', $totais)
-            ->setXAxis($meses);
+    // Preview Encomendas
+    public function previewEncomendas()
+    {
+        $encomendas = EncomendaItem::with(['encomenda', 'produto'])->orderBy('created_at', 'desc')->get();
+        return Pdf::loadView('relatorios.encomendas', compact('encomendas'))->stream();
+    }
 
-        return $chart;
+    // Preview Categorias
+    public function previewCategorias()
+    {
+        $categorias = Categoria::withCount('produtos')->get();
+        return Pdf::loadView('relatorios.categorias', compact('categorias'))->stream();
+    }
+
+    // Preview Pontos
+    public function previewPontos()
+    {
+        $usuarios = Usuario::with('pontos')->get();
+        return Pdf::loadView('relatorios.pontos', compact('usuarios'))->stream();
+    }
+
+    // Download PDF
+    public function downloadPDF($tipo)
+    {
+        switch($tipo) {
+            case 'estoque': $view = 'relatorios.estoque-fornecedor'; break;
+            case 'produtos': $view = 'relatorios.produtos'; break;
+            case 'encomendas': $view = 'relatorios.encomendas'; break;
+            case 'categorias': $view = 'relatorios.categorias'; break;
+            case 'pontos': $view = 'relatorios.pontos'; break;
+            default: abort(404);
+        }
+
+        $pdf = Pdf::loadView($view);
+        return $pdf->download("relatorio_{$tipo}.pdf");
     }
 }
